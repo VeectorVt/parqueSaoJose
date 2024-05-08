@@ -22,6 +22,11 @@ const andamentoRoutes = require('./andamento/andamento.routes')
 const baixaRoutes = require('./baixa/baixa.routes')
 const bancoRoutes = require('./banco/banco.routes')
 const contaRoutes = require('./conta/conta.routes')
+const contaMovimentoRoutes = require('./conta-movimento/conta-movimento.routes')
+const lancamentoRoutes = require('./lancamento/lancamento.routes')
+const sequencialRoutes = require('./sequencial/sequencial.routes')
+const situacaoRoutes = require('./situacao/situacao.routes')
+const vendaRoutes = require('./venda/venda.routes')
 
 //Declarando as libs
 app.use(express.urlencoded({ extended: true }));
@@ -34,7 +39,7 @@ app.set('mongoose connection', mongooseConnection)
 
 //Declarando as rotas
 app.use(index);
-app.use('/api/v1', userRoutes, lotesRoutes, andamentoRoutes, baixaRoutes, bancoRoutes, contaRoutes)
+app.use('/api/v1', userRoutes, lotesRoutes, andamentoRoutes, baixaRoutes, bancoRoutes, contaRoutes, contaMovimentoRoutes, lancamentoRoutes, sequencialRoutes, situacaoRoutes, vendaRoutes)
 
 
 

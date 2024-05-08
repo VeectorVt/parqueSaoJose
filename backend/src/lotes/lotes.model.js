@@ -6,9 +6,25 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const lotesSchema = new Schema({
-    Quadra: { type: String, maxlength: 50, required: true },
-    Lote: { type: String, maxlength: 30, required: true },
-    // id_User:User.db.id
+    quadra: { type: String, required: true },
+    lote: { type: String, required: true },
+    area_total: { type: String },
+    frente: { type: String },
+    area_fr: { type: String },
+    fundo: { type: String },
+    area_fu: { type: String },
+    direito: { type: String },
+    area_ld: { type: String },
+    esquerdo: { type: String },
+    area_le: { type: String },
+    medidas: { type: String },
+    vr_metro_quadrado: { type: String },
+    vr_lote: { type: String },
+    codigo_situacao: { type: String },
+    iptu: { type: String },
+    iptu_desdobramento: { type: String },
+    inscricao_municipal: { type: String },
+    status_lote: { type: String }
 }, {
     timestamps: true,
     collection: 'lotes',
