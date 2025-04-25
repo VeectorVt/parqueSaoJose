@@ -73,14 +73,14 @@ const users = [
   <div class=" p-5 bg-white shadow-2xl rounded-lg">
     <div class="flex justify-between items-center mb-5">
       <!-- border-blue-600 -->
-      <div class=" border-[#253D90] flex  items-center border-2 rounded-md w-4/5">
+      <div class=" flex  items-center border-2 rounded-xl w-4/5">
         <div
-          class=" text-center rounded-sm w-1/2"
+          class=" text-center w-1/3"
         >
         <SelectComponent/>
         </div>
         <input
-          class="w-full p-1 ml-5 placeholder-gray-400 text-base focus:outline-none"
+          class="w-full p-1  placeholder-gray-400 text-base focus:outline-none"
           type="text"
           placeholder="Pesquisar Lote ..."
           v-model="search"
@@ -92,7 +92,7 @@ const users = [
           class="mr-2"
         />
         <button
-          class="flex items-center h-[2.7em] m-0 p-3 rounded-md  bg-[#253D90]"
+          class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl  bg-[#253D90]"
         >
           <Icon  name="ph:magnifying-glass" size="24" class="bg-white" />
         </button>

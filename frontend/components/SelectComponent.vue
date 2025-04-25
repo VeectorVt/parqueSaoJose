@@ -1,9 +1,9 @@
 <template>
-    <div class="text-left m-0  w-full">
+    <div class="text-left m-0 p-1  w-52">
       <!-- Botão que abre o modal -->
       <button
         @click="openModal"
-        class="inline-flex justify-between w-full  h-full rounded-md border border-gray-300 shadow-sm px-7 py-3 bg-[#253D90] text-sm font-medium text-white hover:bg-blue-700"
+        class=" inline-flex justify-between w-52  h-full rounded-xl border border-gray-300 shadow-sm px-7 py-3 bg-[#253D90] text-sm font-medium text-white hover:bg-blue-700"
       >
         {{ selectedOptionsText }}
         <!-- Ícone de dropdown (opcional) -->
