@@ -2,6 +2,7 @@
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
+const isUpdate = ref(false)   
 const filterLotes = ref([]);
 const search = ref("");
 const lotes = ref([]);
@@ -62,11 +63,87 @@ const filterLotesFunction = async () => {
     console.error("Erro buscando quadra e lote:", error);
   } finally {
     lotes.value = response?.lotes;
-   
+
   }
 };
 
+const deleteLotes = async (loteId) => {
+  try {
+    const confirmDelete = confirm("Tem certeza que deseja deletar este lote?");
+    if (!confirmDelete) return;
+
+    const result = await loteService.deleteLote(loteId);
+    if (result) {
+      alert("Lote deletado com sucesso!");
+      await fetchLotes();
+    } else {
+      alert("Erro ao deletar lote. Tente novamente.");
+    }
+  } catch (error) {
+    console.error("Erro ao deletar lote:", error);
+    alert("Erro ao deletar lote. Tente novamente.");
+  }
+};
+
+const editarLotes = async (lote) => {
+  try {
+    console.log(lote);
+    if (lote.quadra == "") {
+      alert("Campo Quadra é obrigatório!");
+      return;
+    }
+    if (lote.lote == "") {
+      alert("Campo Lote é obrigatório!");
+      return;
+    }
+
+    const result = await loteService.updateLote(lote._id , lote);
+    if (result) {
+      alert("Lote editado com sucesso!");
+      isModalOpen.value = false;
+      
+    } else {
+      alert("Erro ao editar lote. Verifique os dados e tente novamente.");
+    }
+  } catch (error) {
+    console.error("Error editing lote:", error);
+    alert("Erro ao editar lote. Verifique os dados e tente novamente.");
+  } finally {
+    clearLote();
+    isUpdate.value = false;
+    await fetchLotes();
+  }
+};
+
+const clearLote = () => {
+  lote.value = {
+    quadra: "",
+    lote: "",
+    status_lote: "",
+    codigo_situacao: "",
+    medidas: "",
+    frente: "",
+    fundo: "",
+    direito: "",
+    esquerdo: "",
+    area_total: "",
+    area_fr: "",
+    area_fu: "",
+    area_ld: "",
+    area_le: "",
+    inscricao_municipal: "",
+    iptu: "",
+    iptu_desdobramento: "",
+    vr_lote: "",
+    vr_metro_quadrado: "",
+  };
+};
+
 const criarLotes = async (lote) => {
+  if (isUpdate.value) {
+    await editarLotes(lote);
+    return;
+  }
   try {
     console.log(lote);
 
@@ -90,12 +167,22 @@ const criarLotes = async (lote) => {
     console.error("Error creating lote:", error);
     alert("Erro ao criar lote. Verifique os dados e tente novamente.");
   } finally {
+    clearLote();
     await fetchLotes();
   }
 };
+const openEditModal = (loteEdit) => {
+  console.log(loteEdit);
+  
+  isUpdate.value = true;
+  lote.value = {...loteEdit};
+  isModalOpen.value = true;
+};
+
 
 const openModal = () => {
-  // console.log("openModal");
+  clearLote();
+  isUpdate.value = false
   isModalOpen.value = true;
 };
 
@@ -200,6 +287,7 @@ const users = [
         @onConfirmSelection="criarLotes"
         :lote="lote"
         :is-modal-open="isModalOpen"
+        :is-update="isUpdate"
       />
     </div>
 
@@ -239,6 +327,7 @@ const users = [
             <td class="px-4 border-r py-3">
               <div class="flex items-center justify-center">
                 <button
+                  @click="openEditModal(lote)"
                   title="Editar"
                   class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl"
                 >
@@ -251,6 +340,7 @@ const users = [
                 <button
                   title="Deletar"
                   class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl"
+                  @click="deleteLotes(lote._id)"
                 >
                   <Icon
                     name="material-symbols:delete-outline"

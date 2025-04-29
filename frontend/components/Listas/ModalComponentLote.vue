@@ -12,7 +12,7 @@
         ></div>
 
         <div class="bg-white rounded-md p-4 shadow-lg z-50 w-[70vw]">
-          <h3 class="text-lg font-medium mb-4">Adicionar Lote</h3>
+          <h3 class="text-lg font-medium mb-4">{{ !isUpdate ? 'Adicionar Lote' : 'Editar Lote' }}</h3>
 
           <div id="first-line" class="grid grid-cols-5 gap-4 mb-4">
             <div>
@@ -280,11 +280,12 @@ const emit = defineEmits(["toggleMenu", "onConfirmSelection"]);
 const props = defineProps({
   isModalOpen: Boolean,
   lote: Object,
+  isUpdate:Boolean
 });
 function confirmSelection() {
   // Emit an event to the parent component with the selected value
   console.log("Lote:", props.lote);
-  emit("onConfirmSelection", props.lote);
+ emit("onConfirmSelection", props.lote);
 }
 
 function closeModal() {

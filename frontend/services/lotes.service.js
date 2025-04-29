@@ -34,7 +34,7 @@ export default {
 
   // Atualizar um lote existente
   updateLote(id, payload) {
-    return $api(`/lotes/${id}`, {
+    return $api(`/edit/lotes/${id}`, {
       method: 'PUT',
       body: payload
     });
@@ -42,7 +42,7 @@ export default {
 
   // Deletar um lote
   deleteLote(id) {
-    return $api(`/lotes/${id}`, {
+    return $api(`/delete/lotes/${id}`, {
       method: 'DELETE'
     });
   }
