@@ -1,4 +1,5 @@
 <script setup>
+import { isSea } from "node:sea";
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
@@ -11,7 +12,7 @@ const fetchLotes = async () => {
   lotes.value = await loteService.getLotes();
   // console.log(lotes.value);
 };
-
+isSearching= ref(false);
 let lote = ref({
   quadra: "",
   lote: "",
@@ -54,6 +55,7 @@ const filterLotesFunction = async () => {
     return;
   }
   let response;
+
   try {
      response = await loteService.buscarQuadraELote(quadra.num, lote.num);
     //  console.log(response);
