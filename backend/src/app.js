@@ -32,7 +32,11 @@ const vendaRoutes = require('./venda/venda.routes')
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.json({ type: 'application/vnd.api+json' }));
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // permite seu frontend acessar
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+  }));
 app.use(morgan('dev'));
 
 app.set('mongoose connection', mongooseConnection)

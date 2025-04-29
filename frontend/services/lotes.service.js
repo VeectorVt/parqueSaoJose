@@ -15,9 +15,18 @@ export default {
     return $api(`/lotes/${id}`);
   },
 
+  buscarQuadraELote(quadra, lote) {
+    const params = new URLSearchParams({ quadra, lote });
+    return $api(`/lotes/filter?${params.toString()}`, {
+      method: 'GET',
+      ContentType: 'application/json',
+    });
+  },
+  
+
   // Criar um novo lote
   createLote(payload) {
-    return $api('/lotes', {
+    return $api('/register/lotes', {
       method: 'POST',
       body: payload
     });

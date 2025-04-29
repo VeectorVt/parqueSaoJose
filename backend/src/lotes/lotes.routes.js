@@ -12,5 +12,17 @@ const lotesController = require('./lotes.controllers')
 
 router.get('/lotes' , lotesController.returnAllLotes)
 
+router.post('/register/lotes',lotesController.registerNewLote);
+
+router.put('/edit/lotes/:id', lotesController.returnEditLote)
+
+router.delete('/delete/lotes/:id', lotesController.deleteLote)
+
+router.get('/lotes/filter', lotesController.filterByQuadraOrLote);
+
 
 module.exports = router
+
+
+
+

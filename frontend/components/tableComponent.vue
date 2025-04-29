@@ -1,5 +1,8 @@
 <script setup>
 import loteService from "~/services/lotes.service";
+const isModalOpen = ref(false);
+const isModalFilter = ref(false);
+const filterLotes = ref([]);
 const search = ref("");
 const lotes = ref([]);
 let isSearching = ref(false);
@@ -9,7 +12,88 @@ const fetchLotes = async () => {
   // console.log(lotes.value);
 };
 
+let lote = ref({
+  quadra: "",
+  lote: "",
+  status_lote: "",
+  codigo_situacao: "",
+  medidas: "",
+  frente: "",
+  fundo: "",
+  direito: "",
+  esquerdo: "",
+  area_total: "",
+  area_fr: "",
+  area_fu: "",
+  area_ld: "",
+  area_le: "",
+  inscricao_municipal: "",
+  iptu: "",
+  iptu_desdobramento: "",
+  vr_lote: "",
+  vr_metro_quadrado: "",
+});
+
 onMounted(await fetchLotes);
+
+function OpenModalFilter() {
+  isModalFilter.value = !isModalFilter.value;
+  // console.log(isModalFilter.value);
+}
+const dataFilterLotes = (filter) => {
+  filterLotes.value = filter;
+  console.log(filterLotes.value);
+}
+
+const filterLotesFunction = async  () => {
+  const quadra = filterLotes.value.find((item) => item.value === "quadra");
+  const lote = filterLotes.value.find((item) => item.value === "lote");
+
+  if (!filterLotes.value.length)  {
+      alert("Selecione um filtro!");
+      return;
+    }
+   
+  try {
+    const response = await loteService.buscarQuadraELote(quadra.num, lote.num);
+    console.log('Resultado:', response);
+  } catch (error) {
+    console.error('Erro buscando quadra e lote:', error);
+  }
+}
+
+const criarLotes = async (lote) => {
+  try {
+    console.log(lote);
+
+    if (lote.quadra == "") {
+      alert("Campo Quadra é obrigatório!");
+      return;
+    }
+    if (lote.lote == "") {
+      alert("Campo Lote é obrigatório!");
+      return;
+    }
+
+    const result = await loteService.createLote(lote);
+    if (result) {
+      alert("Lote criado com sucesso!");
+      isModalOpen.value = false;
+    } else {
+      alert("Erro ao criar lote. Verifique os dados e tente novamente.");
+    }
+  } catch (error) {
+    console.error("Error creating lote:", error);
+    alert("Erro ao criar lote. Verifique os dados e tente novamente.");
+  } finally {
+    await fetchLotes();
+  }
+};
+
+const openModal = () => {
+  // console.log("openModal");
+  isModalOpen.value = true;
+};
 
 const users = [
   {
@@ -70,48 +154,56 @@ const users = [
       Lista de Todos os Lotes:
     </h2>
   </div>
-  <div class=" p-5 bg-white shadow-2xl rounded-lg">
+  <div class="p-5 bg-white shadow-2xl rounded-lg">
     <div class="flex justify-between items-center mb-5">
       <!-- border-blue-600 -->
-      <div class=" flex  items-center border-2 rounded-xl w-4/5">
-        <div
-          class=" text-center w-1/3"
-        >
-        <SelectComponent/>
+      <div class="flex items-center rounded-xl w-4/5">
+        <div class="text-center w-1/4">
+          <SelectComponent
+            :is-modal-filter="isModalFilter"
+            @toggleMenu="OpenModalFilter"
+            @onConfirmSelection="dataFilterLotes"
+          />
         </div>
-        <input
-          class="w-full p-1  placeholder-gray-400 text-base focus:outline-none"
+        <!-- <input
+          class="w-full p-1 placeholder-gray-400 text-base focus:outline-none"
           type="text"
           placeholder="Pesquisar Lote ..."
           v-model="search"
-        />
-        <Icon 
+        /> -->
+        <!-- <Icon
           v-if="isSearching"
           name="eos-icons:loading"
           size="25"
-          class="mr-2"
-        />
+          class="mr-2" -->
+
         <button
-          class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl  bg-[#253D90]"
+          class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl bg-[#253D90]"
+          @click="filterLotesFunction"
         >
-          <Icon  name="ph:magnifying-glass" size="24" class="bg-white" />
+          <Icon name="ph:magnifying-glass" size="24" class="bg-white" />
         </button>
       </div>
 
       <button
         class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+        @click="openModal"
       >
         Adicionar Novo Lote
       </button>
+      <ListasModalComponentLote
+        @toggleMenu="isModalOpen = !isModalOpen"
+        @onConfirmSelection="criarLotes"
+        :lote="lote"
+        :is-modal-open="isModalOpen"
+      />
     </div>
 
     <div class="overflow-auto h-[40vh]">
-      <table
-        class="min-w-full bg-white border border-gray-300 rounded-lg"
-      >
+      <table class="min-w-full bg-white border border-gray-300 rounded-lg">
         <thead>
           <tr class="bg-gray-100 text-gray-700 text-left">
-            <th class="px-4 py-2 border-r border-b">Ações</th>
+            <th class="px-4 py-2 border-r border-b w-26">Ações</th>
             <th class="px-4 py-2 border-r border-b">Lote</th>
             <th class="px-4 py-2 border-r border-b">Quadra</th>
             <th class="px-4 py-2 border-r border-b">Status</th>
@@ -140,7 +232,31 @@ const users = [
             :key="index"
             class="border-b hover:bg-gray-50 transition"
           >
-            <td class="px-4 border-r py-3">Edit/Delet</td>
+            <td class="px-4 border-r py-3">
+              <div class="flex items-center justify-center">
+                <button
+                  title="Editar"
+                  class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl"
+                >
+                  <Icon
+                    name="material-symbols:edit"
+                    size="24"
+                    class="text-[#253D90]"
+                  />
+                </button>
+                <button
+                  title="Deletar"
+                  class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl"
+                >
+                  <Icon
+                    name="material-symbols:delete-outline"
+                    class="text-[#e9130c]"
+                    size="24"
+                  />
+                  <!-- color=""  -->
+                </button>
+              </div>
+            </td>
             <td class="px-4 border-r py-3">{{ lote.lote }}</td>
             <td class="px-4 border-r py-3">{{ lote.quadra }}</td>
             <td class="px-4 border-r py-3">{{ lote.status_lote }}</td>
