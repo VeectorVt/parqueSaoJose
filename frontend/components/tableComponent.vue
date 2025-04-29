@@ -43,24 +43,27 @@ function OpenModalFilter() {
 const dataFilterLotes = (filter) => {
   filterLotes.value = filter;
   console.log(filterLotes.value);
-}
+};
 
-const filterLotesFunction = async  () => {
+const filterLotesFunction = async () => {
   const quadra = filterLotes.value.find((item) => item.value === "quadra");
   const lote = filterLotes.value.find((item) => item.value === "lote");
 
-  if (!filterLotes.value.length)  {
-      alert("Selecione um filtro!");
-      return;
-    }
-   
-  try {
-    const response = await loteService.buscarQuadraELote(quadra.num, lote.num);
-    console.log('Resultado:', response);
-  } catch (error) {
-    console.error('Erro buscando quadra e lote:', error);
+  if (!filterLotes.value.length) {
+    alert("Selecione um filtro!");
+    return;
   }
-}
+  let response;
+  try {
+     response = await loteService.buscarQuadraELote(quadra.num, lote.num);
+    //  console.log(response);
+  } catch (error) {
+    console.error("Erro buscando quadra e lote:", error);
+  } finally {
+    lotes.value = response?.lotes;
+   
+  }
+};
 
 const criarLotes = async (lote) => {
   try {
