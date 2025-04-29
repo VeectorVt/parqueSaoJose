@@ -1,5 +1,4 @@
 <script setup>
-import { isSea } from "node:sea";
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
