@@ -20,6 +20,7 @@ router.delete('/delete/lotes/:id', lotesController.deleteLote)
 
 router.get('/lotes/filter', lotesController.filterByQuadraOrLote);
 
+router.get('/lotes/filter/pagination', lotesController.paginationLote);
 
 module.exports = router
 

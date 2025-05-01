@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const Lotes = require('./lotes.model')
 
 exports.returnAllLotes = async (req, res) => {
@@ -15,7 +17,7 @@ exports.registerNewLote = async (req, res) => {
   try {
     const newLote = new Lotes(req.body);
     const lote = await newLote.save();
-    //  const token = await newAplicador.generateAuthToken();
+   
     res.status(201).json({ message: ' Lote cadastrado com sucesso', lote });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -39,15 +41,15 @@ exports.returnEditLote = async (req, res) => {
       return res.status(404).json({ message: 'Lote não encontrado' });
     }
 
-    return res.status(200).json({ 
-      message: 'Lote atualizado com sucesso', 
-      lote: loteAtualizado 
+    return res.status(200).json({
+      message: 'Lote atualizado com sucesso',
+      lote: loteAtualizado
     });
   } catch (error) {
     console.error('Erro ao atualizar lote:', error);
-    return res.status(500).json({ 
-      message: 'Erro ao atualizar lote', 
-      error: error.message 
+    return res.status(500).json({
+      message: 'Erro ao atualizar lote',
+      error: error.message
     });
   }
 };
@@ -68,6 +70,63 @@ exports.deleteLote = async (req, res) => {
   }
 };
 
+exports.paginationLote = async (req, res) => {
+  try {
+    const size       = parseInt(req.query.size, 10) || 25;
+    const cursor     = req.query.cursor || null;
+    const prevCursor = req.query.prevCursor || null;
+
+    
+    const baseFilter = {};
+    if (req.query.filter) baseFilter.status_lote = req.query.filter;
+    const { quadra, lote } = req.query;
+    if (quadra) baseFilter.quadra = quadra;
+    if (lote)  baseFilter.lote   = lote;
+
+    let queryFilter = { ...baseFilter };
+    let sortOrder = { _id: 1 };
+
+   
+    if (cursor) {
+      queryFilter._id = { $gt: mongoose.Types.ObjectId(cursor) };
+    }
+
+  
+    if (prevCursor) {
+      queryFilter._id = { $lt: mongoose.Types.ObjectId(prevCursor) };
+      sortOrder = { _id: -1 }; 
+    }
+
+    // TODO Criação de mostrar  total de páginas
+    // const totalCount = await Lotes.countDocuments(queryFilter);
+    // const totalPages = Math.ceil(totalCount / size);
+    // ...
+  
+    let items = await Lotes.find(queryFilter)
+      .sort(sortOrder)
+      .limit(size);
+
+    if (prevCursor) items = items.reverse();
+
+    const nextCursorCalc = items.length ? items[items.length - 1]._id.toString() : null;
+    const prevCursorCalc = items.length ? items[0]._id.toString() : null;
+
+    return res.status(200).json({
+      message:    'Lotes encontrados com sucesso',
+      items,
+      pageSize:   size,
+      nextCursor: nextCursorCalc,
+      prevCursor: prevCursorCalc,
+      hasMoreNext: nextCursorCalc !== null,
+      hasMorePrev: prevCursorCalc !== null
+    });
+
+  } catch (error) {
+    console.error('Erro ao buscar lotes:', error);
+    return res.status(500).json({ message: 'Erro ao buscar lotes', error: error.message });
+  }
+};
+
 exports.filterByQuadraOrLote = async (req, res) => {
   try {
     const { quadra, lote } = req.query; // Puxando de query params agora!
@@ -79,12 +138,9 @@ exports.filterByQuadraOrLote = async (req, res) => {
 
     // Montar o filtro dinamicamente
     let filtro = {};
-    if (quadra) {
-      filtro.quadra = quadra;
-    }
-    if (lote) {
-      filtro.lote = lote;
-    }
+    if (quadra) filtro.quadra = quadra;
+    if (lote) filtro.lote = lote;
+
 
     // Realiza a busca com o filtro montado
     const lotes = await Lotes.find(filtro);
