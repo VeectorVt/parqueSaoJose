@@ -2,9 +2,14 @@
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
-const isUpdate = ref(false)   
+const isUpdate = ref(false)
 const filterLotes = ref([]);
-const search = ref("");
+const search = ref({
+size:'',
+cursor:'',
+prevCursor:'',
+filter:'',
+});
 const lotes = ref([]);
 let isSearching = ref(false);
 // Buscar lotes ao carregar a página
@@ -45,6 +50,24 @@ const dataFilterLotes = (filter) => {
   filterLotes.value = filter;
   console.log(filterLotes.value);
 };
+
+const paginationLotes = async () =>{
+
+try {
+  isSearching.value = true;
+  const search = {
+    size: 10,
+    cursor: lotes.value.length ? lotes.value[lotes.value.length - 1]._id : null,
+    prevCursor: null,
+    filter: filterLotes.value,
+  };
+
+  const response = await loteService.getLotesPagination(search.value);
+  lotes.value = response.data;
+} catch (error) {
+  console.error("Error fetching paginated lotes:", error);
+}
+}
 
 const filterLotesFunction = async () => {
   const quadra = filterLotes.value.find((item) => item.value === "quadra");
@@ -101,7 +124,7 @@ const editarLotes = async (lote) => {
     if (result) {
       alert("Lote editado com sucesso!");
       isModalOpen.value = false;
-      
+
     } else {
       alert("Erro ao editar lote. Verifique os dados e tente novamente.");
     }
@@ -173,7 +196,7 @@ const criarLotes = async (lote) => {
 };
 const openEditModal = (loteEdit) => {
   console.log(loteEdit);
-  
+
   isUpdate.value = true;
   lote.value = {...loteEdit};
   isModalOpen.value = true;

@@ -45,5 +45,14 @@ export default {
     return $api(`/delete/lotes/${id}`, {
       method: 'DELETE'
     });
+  },
+
+  paginationLote(size,cursor,prevCursor,filter){
+    const params = new URLSearchParams({ size, cursor, prevCursor, filter });
+    return $api(`/lotes/filter/pagination?${params.toString()}`, {
+      method: 'GET',
+      ContentType: 'application/json',
+    });
   }
+  
 };
