@@ -2,13 +2,13 @@
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
-const isUpdate = ref(false)
+const isUpdate = ref(false);
 const filterLotes = ref([]);
 const search = ref({
-size:'',
-cursor:'',
-prevCursor:'',
-filter:'',
+  size: "",
+  cursor: "",
+  prevCursor: "",
+  filter: "",
 });
 const lotes = ref([]);
 let isSearching = ref(false);
@@ -17,7 +17,7 @@ const fetchLotes = async () => {
   lotes.value = await loteService.getLotes();
   // console.log(lotes.value);
 };
-isSearching= ref(false);
+isSearching = ref(false);
 let lote = ref({
   quadra: "",
   lote: "",
@@ -40,7 +40,10 @@ let lote = ref({
   vr_metro_quadrado: "",
 });
 
-onMounted(await fetchLotes);
+onMounted(async () => {
+  // await fetchLotes();
+  await paginationLotes();
+});
 
 function OpenModalFilter() {
   isModalFilter.value = !isModalFilter.value;
@@ -51,23 +54,44 @@ const dataFilterLotes = (filter) => {
   console.log(filterLotes.value);
 };
 
-const paginationLotes = async () =>{
+const paginationLotes = async () => {
+  const quadra = filterLotes.value.find((item) => item.value === "quadra");
+  const lote = filterLotes.value.find((item) => item.value === "lote");
 
-try {
-  isSearching.value = true;
-  const search = {
-    size: 10,
-    cursor: lotes.value.length ? lotes.value[lotes.value.length - 1]._id : null,
-    prevCursor: null,
-    filter: filterLotes.value,
-  };
+  try {
+    isSearching.value = true;
+    const search = {
+      size: 11,
+      cursor: lotes.value.length
+        ? lotes.value[lotes.value.length - 1]._id
+        : "",
+      prevCursor: "",
+      quadra: quadra ? quadra.num : "",
+      lote: lote ? lote.num : "",
+    };
 
-  const response = await loteService.getLotesPagination(search.value);
-  lotes.value = response.data;
-} catch (error) {
-  console.error("Error fetching paginated lotes:", error);
-}
-}
+    const response = await loteService.paginationLote(
+      search.size,
+      search.cursor,
+      search.prevCursor,
+      search.quadra,
+      search.lote
+    );
+   
+
+    if (response.items.length === 0) {
+      alert("Nenhum lote encontrado com os filtros aplicados.");
+      return;
+    }
+
+    console.log(response);
+    lotes.value = response?.items;
+  } catch (error) {
+    console.error("Error fetching paginated lotes:", error);
+  } finally {
+    isSearching.value = false;
+  }
+};
 
 const filterLotesFunction = async () => {
   const quadra = filterLotes.value.find((item) => item.value === "quadra");
@@ -80,13 +104,12 @@ const filterLotesFunction = async () => {
   let response;
 
   try {
-     response = await loteService.buscarQuadraELote(quadra.num, lote.num);
+    response = await loteService.buscarQuadraELote(quadra.num, lote.num);
     //  console.log(response);
   } catch (error) {
     console.error("Erro buscando quadra e lote:", error);
   } finally {
     lotes.value = response?.lotes;
-
   }
 };
 
@@ -120,11 +143,10 @@ const editarLotes = async (lote) => {
       return;
     }
 
-    const result = await loteService.updateLote(lote._id , lote);
+    const result = await loteService.updateLote(lote._id, lote);
     if (result) {
       alert("Lote editado com sucesso!");
       isModalOpen.value = false;
-
     } else {
       alert("Erro ao editar lote. Verifique os dados e tente novamente.");
     }
@@ -198,67 +220,15 @@ const openEditModal = (loteEdit) => {
   console.log(loteEdit);
 
   isUpdate.value = true;
-  lote.value = {...loteEdit};
+  lote.value = { ...loteEdit };
   isModalOpen.value = true;
 };
-
 
 const openModal = () => {
   clearLote();
-  isUpdate.value = false
+  isUpdate.value = false;
   isModalOpen.value = true;
 };
-
-const users = [
-  {
-    name: "Lindsay Walton",
-    title: "Front-end Developer",
-    email: "lindsay.walton@example.com",
-    role: "Member",
-  },
-  {
-    name: "Courtney Henry",
-    title: "Designer",
-    email: "courtney.henry@example.com",
-    role: "Admin",
-  },
-  {
-    name: "Tom Cook",
-    title: "Director of Product",
-    email: "tom.cook@example.com",
-    role: "Member",
-  },
-  {
-    name: "Whitney Francis",
-    title: "Copywriter",
-    email: "whitney.francis@example.com",
-    role: "Admin",
-  },
-  {
-    name: "Leonard Krasner",
-    title: "Senior Designer",
-    email: "leonard.krasner@example.com",
-    role: "Owner",
-  },
-  {
-    name: "Floyd Miles",
-    title: "Principal Designer",
-    email: "floyd.miles@example.com",
-    role: "Member",
-  },
-  {
-    name: "Floyd Miles",
-    title: "Principal Designer",
-    email: "floyd.miles@example.com",
-    role: "Member",
-  },
-  {
-    name: "Floyd Miles",
-    title: "Principal Designer",
-    email: "floyd.miles@example.com",
-    role: "Member",
-  },
-];
 </script>
 
 <template>
@@ -396,6 +366,17 @@ const users = [
           </tr>
         </tbody>
       </table>
+
     </div>
+
+    
+    <div class="flex justify-center mt-4">
+        <button
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+          @click="paginationLotes"
+        >
+          Carregar mais lotes
+        </button>
+        </div>
   </div>
 </template>

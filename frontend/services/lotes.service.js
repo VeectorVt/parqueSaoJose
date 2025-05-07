@@ -3,9 +3,9 @@ import $api from './api.services';
 export default {
   // Buscar todos os lotes
   getLotes() {
-    return $api('/lotes' , {
-        method: 'GET',
-        ContentType: 'application/json',
+    return $api('/lotes', {
+      method: 'GET',
+      ContentType: 'application/json',
     });
   },
 
@@ -22,7 +22,7 @@ export default {
       ContentType: 'application/json',
     });
   },
-  
+
 
   // Criar um novo lote
   createLote(payload) {
@@ -47,12 +47,14 @@ export default {
     });
   },
 
-  paginationLote(size,cursor,prevCursor,filter){
-    const params = new URLSearchParams({ size, cursor, prevCursor, filter });
+  paginationLote(size,cursor , prevCursor , quadra , lote) {
+    // const { size, cursor, prevCursor, quadra, lote } = searchFilterParam
+  
+    const params = new URLSearchParams({ size, cursor, prevCursor, quadra, lote });
     return $api(`/lotes/filter/pagination?${params.toString()}`, {
       method: 'GET',
       ContentType: 'application/json',
     });
   }
-  
+
 };
