@@ -1,15 +1,12 @@
+
+<!-- TODO : Criar Loading , Criar alert usando sweetAlert , Componentizar para outras listas -->
 <script setup>
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
 const isUpdate = ref(false);
 const filterLotes = ref([]);
-const search = ref({
-  size: "",
-  cursor: "",
-  prevCursor: "",
-  filter: "",
-});
+const searchPagination = ref({});
 const lotes = ref([]);
 let isSearching = ref(false);
 // Buscar lotes ao carregar a página
@@ -54,30 +51,50 @@ const dataFilterLotes = (filter) => {
   console.log(filterLotes.value);
 };
 
-const paginationLotes = async () => {
+const paginationLotes = async (
+  prevCursor,
+  lastPage = "",
+  firstPage = "",
+  filter = ''
+) => {
   const quadra = filterLotes.value.find((item) => item.value === "quadra");
   const lote = filterLotes.value.find((item) => item.value === "lote");
 
   try {
     isSearching.value = true;
     const search = {
-      size: 11,
-      cursor: lotes.value.length
-        ? lotes.value[lotes.value.length - 1]._id
-        : "",
-      prevCursor: "",
+      size: 25,
+      cursor:
+        lotes.value.length && !prevCursor && !lastPage && !firstPage && !filter
+          ? lotes.value[lotes.value.length - 1]._id
+          : "",
+      prevCursor:
+        prevCursor && !lastPage && !firstPage && !filter
+          ? lotes.value[0]._id
+          : "",
       quadra: quadra ? quadra.num : "",
       lote: lote ? lote.num : "",
+      totalPages: 0,
+      totalItens: 0,
+      hasMoreNext: false,
+      hasMorePrev: false,
+      lastPage: lastPage,
+      firstPage: firstPage,
+      isFilter:filter
     };
+
+    console.log("search:", search);
 
     const response = await loteService.paginationLote(
       search.size,
       search.cursor,
       search.prevCursor,
       search.quadra,
-      search.lote
+      search.lote,
+      search.lastPage,
+      search.firstPage,
+      search.isFilter
     );
-   
 
     if (response.items.length === 0) {
       alert("Nenhum lote encontrado com os filtros aplicados.");
@@ -86,6 +103,13 @@ const paginationLotes = async () => {
 
     console.log(response);
     lotes.value = response?.items;
+
+    search.totalPages = response?.totalPages;
+    search.totalItens = response?.totalItens;
+    search.hasMoreNext = response?.hasMoreNext;
+    search.hasMorePrev = response?.hasMorePrev;
+
+    searchPagination.value = search;
   } catch (error) {
     console.error("Error fetching paginated lotes:", error);
   } finally {
@@ -94,23 +118,24 @@ const paginationLotes = async () => {
 };
 
 const filterLotesFunction = async () => {
-  const quadra = filterLotes.value.find((item) => item.value === "quadra");
-  const lote = filterLotes.value.find((item) => item.value === "lote");
+  // const quadra = filterLotes.value.find((item) => item.value === "quadra");
+  // const lote = filterLotes.value.find((item) => item.value === "lote");
 
-  if (!filterLotes.value.length) {
-    alert("Selecione um filtro!");
-    return;
-  }
-  let response;
+  // if (!filterLotes.value.length) {
+  //   alert("Selecione um filtro!");
+  //   return;
+  // }
+  // let response;
 
-  try {
-    response = await loteService.buscarQuadraELote(quadra.num, lote.num);
-    //  console.log(response);
-  } catch (error) {
-    console.error("Erro buscando quadra e lote:", error);
-  } finally {
-    lotes.value = response?.lotes;
-  }
+  // try {
+  //   response = await loteService.buscarQuadraELote(quadra.num, lote.num);
+  //   //  console.log(response);
+  // } catch (error) {
+  //   console.error("Erro buscando quadra e lote:", error);
+  // } finally {
+  //   lotes.value = response?.lotes;
+  // }
+  await paginationLotes(false, "", "", true);
 };
 
 const deleteLotes = async (loteId) => {
@@ -366,17 +391,122 @@ const openModal = () => {
           </tr>
         </tbody>
       </table>
-
     </div>
 
-    
-    <div class="flex justify-center mt-4">
-        <button
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
-          @click="paginationLotes"
+    <div class="flex justify-center gap-2 mt-4">
+      <button
+        :disabled="!searchPagination.hasMorePrev"
+        :class="[
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
+          !searchPagination.hasMorePrev ? 'btn-disable' : '',
+        ]"
+        @click="paginationLotes(false, '', true)"
+      >
+        <!-- First Item  -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13.015"
+          height="13.015"
+          viewBox="0 0 13.015 13.015"
         >
-          Carregar mais lotes
-        </button>
-        </div>
+          <path
+            id="Icon_material-skip-previous"
+            data-name="Icon material-skip-previous"
+            d="M9,9h2.169V22.015H9Zm3.8,6.508,9.219,6.508V9Z"
+            transform="translate(-9 -9)"
+            fill="white"
+          />
+        </svg>
+        <!-- :fill="
+                  !firstPage
+                    ? 'var(--md-theme-default-navy)'
+                    : 'var(--md-theme-default-disabled-field)'
+                " -->
+      </button>
+      <!-- Prev  -->
+      <button
+        :disabled="!searchPagination.hasMorePrev"
+        :class="[
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
+          !searchPagination.hasMorePrev ? 'btn-disable' : '',
+        ]"
+        @click="paginationLotes(true)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="9.219"
+          height="13.015"
+          viewBox="0 0 9.219 13.015"
+        >
+          <path
+            id="Icon_material-skip-previous"
+            data-name="Icon material-skip-previous"
+            d="M12.8,15.508l9.219,6.508V9Z"
+            transform="translate(-12.796 -9)"
+            fill="white"
+          />
+          <!-- :fill="" -->
+        </svg>
+      </button>
+
+      <!-- Next  -->
+      <button
+        :disabled="!searchPagination.hasMoreNext"
+        :class="[
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
+          !searchPagination.hasMoreNext ? 'btn-disable' : '',
+        ]"
+        @click="paginationLotes(false)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="9.219"
+          height="13.015"
+          viewBox="0 0 9.219 13.015"
+        >
+          <path
+            id="Icon_material-skip-previous"
+            data-name="Icon material-skip-previous"
+            d="M12.8,15.508l9.219,6.508V9Z"
+            transform="translate(22.015 22.015) rotate(180)"
+            fill="white"
+          />
+        </svg>
+        <!-- :fill="
+                  !lastPage
+                    ? 'var(--md-theme-default-primary)'
+                    : 'var(--md-theme-default-disabled-field)'
+                " -->
+      </button>
+
+      <button
+        :disabled="!searchPagination.hasMoreNext"
+        :class="[
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
+          !searchPagination.hasMoreNext ? 'btn-disable' : '',
+        ]"
+        @click="paginationLotes(false, true)"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="13.015"
+          height="13.015"
+          viewBox="0 0 13.015 13.015"
+        >
+          <path
+            id="Icon_material-skip-next"
+            data-name="Icon material-skip-next"
+            d="M9,22.015l9.219-6.508L9,9ZM19.846,9V22.015h2.169V9Z"
+            transform="translate(-9 -9)"
+            fill="white"
+          />
+        </svg>
+        <!-- :fill="
+                  !lastPage
+                    ? 'var(--md-theme-default-navy)'
+                    : 'var(--md-theme-default-disabled-field)'
+                " -->
+      </button>
+    </div>
   </div>
 </template>

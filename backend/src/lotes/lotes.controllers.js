@@ -17,7 +17,7 @@ exports.registerNewLote = async (req, res) => {
   try {
     const newLote = new Lotes(req.body);
     const lote = await newLote.save();
-   
+
     res.status(201).json({ message: ' Lote cadastrado com sucesso', lote });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -72,53 +72,87 @@ exports.deleteLote = async (req, res) => {
 
 exports.paginationLote = async (req, res) => {
   try {
-    const size       = parseInt(req.query.size, 10) || 25;
-    const cursor     = req.query.cursor || null;
+    const size = parseInt(req.query.size, 10) || 25;
+    const cursor = req.query.cursor || null;
     const prevCursor = req.query.prevCursor || null;
+    const lastPage = req.query.lastPage || null; // Adicionando lastPage aqui
+    const firstPage = req.query.firstPage || null; // Adicionando firstPage aqui
+    const isFilter = req.query.isFilter || null; // Adicionando isFilter aqui
 
-    
-    const baseFilter = {};
-    if (req.query.filter) baseFilter.status_lote = req.query.filter;
     const { quadra, lote } = req.query;
-    if (quadra) baseFilter.quadra = quadra;
-    if (lote)  baseFilter.lote   = lote;
+
+    // Construção do filtro base
+    const baseFilter = {};
+    if (quadra) baseFilter.quadra = quadra.trim(); // Insensível a maiúsculas/minúsculas
+    if (lote) baseFilter.lote_num = Number(lote)
+
 
     let queryFilter = { ...baseFilter };
-    let sortOrder = { _id: 1 };
 
-   
+
+    let sortOrder = { _id: 1 };
+    let firstItem = null;
+    let lastItem = null;
+
+    lastItem = await Lotes.findOne(queryFilter).sort({ _id: 1 }).select('_id');
+
+    console.log('lastItem', lastItem);
+    console.log('firstItem', firstItem);
+
+    // TODO: Ajustar lastPage para funcionar com o filtro
+    if (lastPage) {
+      const lastItemId = lastItem ? lastItem._id.toString() : null;
+      queryFilter._id = { $lt: mongoose.Types.ObjectId(lastItemId) };
+      sortOrder = { _id: -1 };
+    }
+    firstItem = await Lotes.findOne(queryFilter).sort({ _id: 1 }).select('_id');
+    // if (firstPage) {
+    //   const firstItemId = firstItem ? firstItem._id.toString() : null;
+    //   queryFilter._id = { $gt: mongoose.Types.ObjectId(firstItemId) };
+
+    // }
+
     if (cursor) {
       queryFilter._id = { $gt: mongoose.Types.ObjectId(cursor) };
     }
 
-  
+
     if (prevCursor) {
       queryFilter._id = { $lt: mongoose.Types.ObjectId(prevCursor) };
-      sortOrder = { _id: -1 }; 
+      sortOrder = { _id: -1 };
     }
 
     // TODO Criação de mostrar  total de páginas
-    // const totalCount = await Lotes.countDocuments(queryFilter);
-    // const totalPages = Math.ceil(totalCount / size);
-    // ...
-  
+    const totalCount = await Lotes.countDocuments(queryFilter);
+    const totalPages = Math.ceil(totalCount / size);
+
+
+    console.log('queryFilter', queryFilter);
     let items = await Lotes.find(queryFilter)
       .sort(sortOrder)
       .limit(size);
 
-    if (prevCursor) items = items.reverse();
+    if (prevCursor || lastPage) items = items.reverse();
 
     const nextCursorCalc = items.length ? items[items.length - 1]._id.toString() : null;
     const prevCursorCalc = items.length ? items[0]._id.toString() : null;
 
+    const verifyFirstPage = (firstPage || firstItem?._id.toString() == prevCursorCalc)
+    const verifyLastPage = (lastPage || lastItem?._id.toString() == nextCursorCalc)  // Verifica se é a última página
+
+    console.log('verifyLastPage', verifyLastPage);
+    console.log('verifyFirstPage', verifyFirstPage);
+
     return res.status(200).json({
-      message:    'Lotes encontrados com sucesso',
+      totalCount,
+      totalPages,
+      message: 'Lotes encontrados com sucesso',
       items,
-      pageSize:   size,
+      pageSize: size,
       nextCursor: nextCursorCalc,
       prevCursor: prevCursorCalc,
-      hasMoreNext: nextCursorCalc !== null,
-      hasMorePrev: prevCursorCalc !== null
+      hasMoreNext: nextCursorCalc !== null && !verifyLastPage,
+      hasMorePrev: prevCursorCalc !== null && !verifyFirstPage
     });
 
   } catch (error) {

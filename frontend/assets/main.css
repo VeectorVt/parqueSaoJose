@@ -1,5 +1,11 @@
-/* 
+ 
 
-body{
+/* *{
+width: 2vw;
+}  */
 
-} */
+.btn-disable {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
