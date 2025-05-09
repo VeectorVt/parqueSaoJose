@@ -1,17 +1,18 @@
-
-<!-- TODO : Criar Loading , Criar alert usando sweetAlert , Componentizar para outras listas -->
+<!-- TODO : Criar Indicação de Página , Criar Loading , Criar alert usando sweetAlert , Componentizar para outras listas -->
 <script setup>
 import loteService from "~/services/lotes.service";
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
 const isUpdate = ref(false);
 const filterLotes = ref([]);
-const searchPagination = ref({});
+const searchPagination = ref({
+  currentPage: 1,
+});
 const lotes = ref([]);
 let isSearching = ref(false);
 // Buscar lotes ao carregar a página
 const fetchLotes = async () => {
-  lotes.value = await loteService.getLotes();
+  await paginationLotes();
   // console.log(lotes.value);
 };
 isSearching = ref(false);
@@ -38,8 +39,8 @@ let lote = ref({
 });
 
 onMounted(async () => {
-  // await fetchLotes();
-  await paginationLotes();
+  await fetchLotes();
+  // await paginationLotes();
 });
 
 function OpenModalFilter() {
@@ -55,7 +56,8 @@ const paginationLotes = async (
   prevCursor,
   lastPage = "",
   firstPage = "",
-  filter = ''
+  filter = "",
+  nextCursor
 ) => {
   const quadra = filterLotes.value.find((item) => item.value === "quadra");
   const lote = filterLotes.value.find((item) => item.value === "lote");
@@ -80,7 +82,7 @@ const paginationLotes = async (
       hasMorePrev: false,
       lastPage: lastPage,
       firstPage: firstPage,
-      isFilter:filter
+      isFilter: filter,
     };
 
     console.log("search:", search);
@@ -109,7 +111,14 @@ const paginationLotes = async (
     search.hasMoreNext = response?.hasMoreNext;
     search.hasMorePrev = response?.hasMorePrev;
 
-    searchPagination.value = search;
+    searchPagination.value = Object.assign(searchPagination.value, search);
+
+    if (lastPage) searchPagination.value.currentPage = search.totalPages;
+    if (firstPage) searchPagination.value.currentPage = 1;
+    if (prevCursor) searchPagination.value.currentPage -= 1;
+    if (nextCursor) searchPagination.value.currentPage += 1;
+
+    console.log("searchPagination:", searchPagination.value);
   } catch (error) {
     console.error("Error fetching paginated lotes:", error);
   } finally {
@@ -135,7 +144,9 @@ const filterLotesFunction = async () => {
   // } finally {
   //   lotes.value = response?.lotes;
   // }
+   searchPagination.value.currentPage = 1;
   await paginationLotes(false, "", "", true);
+ 
 };
 
 const deleteLotes = async (loteId) => {
@@ -397,8 +408,10 @@ const openModal = () => {
       <button
         :disabled="!searchPagination.hasMorePrev"
         :class="[
-          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
-          !searchPagination.hasMorePrev ? 'btn-disable' : '',
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow ',
+          !searchPagination.hasMorePrev
+            ? 'btn-disable'
+            : 'hover:bg-blue-700 transition',
         ]"
         @click="paginationLotes(false, '', true)"
       >
@@ -427,8 +440,10 @@ const openModal = () => {
       <button
         :disabled="!searchPagination.hasMorePrev"
         :class="[
-          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
-          !searchPagination.hasMorePrev ? 'btn-disable' : '',
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow ',
+          !searchPagination.hasMorePrev
+            ? 'btn-disable'
+            : 'hover:bg-blue-700 transition',
         ]"
         @click="paginationLotes(true)"
       >
@@ -453,10 +468,12 @@ const openModal = () => {
       <button
         :disabled="!searchPagination.hasMoreNext"
         :class="[
-          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
-          !searchPagination.hasMoreNext ? 'btn-disable' : '',
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow ',
+          !searchPagination.hasMoreNext
+            ? 'btn-disable'
+            : 'hover:bg-blue-700 transition',
         ]"
-        @click="paginationLotes(false)"
+        @click="paginationLotes(false, '', '', '', true)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -482,8 +499,10 @@ const openModal = () => {
       <button
         :disabled="!searchPagination.hasMoreNext"
         :class="[
-          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition',
-          !searchPagination.hasMoreNext ? 'btn-disable' : '',
+          'px-4 py-2 bg-blue-600 text-white rounded-lg shadow ',
+          !searchPagination.hasMoreNext
+            ? 'btn-disable'
+            : 'hover:bg-blue-700 transition',
         ]"
         @click="paginationLotes(false, true)"
       >
@@ -507,6 +526,13 @@ const openModal = () => {
                     : 'var(--md-theme-default-disabled-field)'
                 " -->
       </button>
+
+      <div class="flex items-center">
+        <p class="text-sm text-gray-600">
+          Página {{ searchPagination.currentPage }} de
+          {{ searchPagination.totalPages }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
