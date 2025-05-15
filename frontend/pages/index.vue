@@ -27,13 +27,14 @@
 
 <script setup>
 import loteService from "~/services/lotes.service";
+import Swal from "~/components/utils/customSwal";
 const columns = [
   { label: "Lote", key: "lote" },
   { label: "Quadra", key: "quadra" },
   { label: "Status", key: "status_lote" },
   { label: "Situação", key: "codigo_situacao" },
   { label: "Medidas", key: "medidas" },
-  { label: "Frente", key: "frente", class: "w-1/2" },
+  { label: "Frente", key: "frente", class:  'w-[530px]' },
   { label: "Fundo", key: "fundo" },
   { label: "Direito", key: "direito" },
   { label: "Esquerdo", key: "esquerdo" },
@@ -62,9 +63,7 @@ let isLoading = ref(false);
 // Buscar lotes ao carregar a página
 const fetchLotes = async () => {
   await paginationLotes();
-
 };
-
 
 let lote = ref({
   quadra: "",
@@ -101,10 +100,9 @@ const dataFilterLotes = (filter, options = [], getLoteByCrud = false) => {
       };
     });
 
-filterLotes.value = getLoteByCrud
+  filterLotes.value = getLoteByCrud
     ? filterLotes.value
     : [...formattedOptions.value];
-
 };
 
 const getLote = (lote, quadra) => {
@@ -132,7 +130,12 @@ const paginationLotes = async (
     const search = {
       size: 25,
       cursor:
-        lotes.value.length && !prevCursor && !lastPage && !firstPage && !filter
+        lotes.value.length &&
+        !prevCursor &&
+        !lastPage &&
+        !firstPage &&
+        !filter &&
+        nextCursor
           ? lotes.value[lotes.value.length - 1]._id
           : "",
       prevCursor:
@@ -150,7 +153,6 @@ const paginationLotes = async (
       isFilter: filter,
     };
 
-
     const response = await loteService.paginationLote(
       search.size,
       search.cursor,
@@ -163,10 +165,11 @@ const paginationLotes = async (
     );
 
     if (response.items.length === 0) {
-      alert("Nenhum lote encontrado com os filtros aplicados.");
+      Swal.swalError({
+        text: "Nenhum lote encontrado com os Filtros Aplicados",
+      });
       return;
     }
-
 
     lotes.value = response?.items;
 
@@ -181,10 +184,9 @@ const paginationLotes = async (
     if (firstPage) searchPagination.value.currentPage = 1;
     if (prevCursor) searchPagination.value.currentPage -= 1;
     if (nextCursor) searchPagination.value.currentPage += 1;
-
-
   } catch (error) {
     console.error("Error fetching paginated lotes:", error);
+    Swal.swalErrorResponse({ error });
   } finally {
     isSearching.value = false;
     isLoading.value = false;
@@ -197,50 +199,109 @@ const filterLotesFunction = async () => {
 };
 
 const deleteLotes = async (loteId) => {
-  try {
-    const confirmDelete = confirm("Tem certeza que deseja deletar este lote?");
-    if (!confirmDelete) return;
-
-    const result = await loteService.deleteLote(loteId);
-    if (result) {
-      alert("Lote deletado com sucesso!");
-      await fetchLotes();
-    } else {
-      alert("Erro ao deletar lote. Tente novamente.");
+  const result = await Swal.swalConfirm(
+    "Você tem certeza que deseja Deletar este lote?",
+    "",
+    "warning",
+    "Sim",
+    "Não",
+    true,
+    true
+  );
+  if (result.isConfirmed) {
+    try {
+      const result = await loteService.deleteLote(loteId);
+      if (result) {
+        await Swal.swalSuccess({ text: "Lote Deletado com sucesso!" });
+      }
+    } catch (error) {
+      console.error("Erro ao deletar lote:", error);
+      Swal.swalErrorResponse({ error });
+    } finally {
+      await paginationLotes(false, "", "", "", false);
     }
-  } catch (error) {
-    console.error("Erro ao deletar lote:", error);
-    alert("Erro ao deletar lote. Tente novamente.");
   }
 };
 
 const editarLotes = async (lote) => {
-  try {
+  if (lote.quadra == "") {
+    Swal.swalError({ text: "Campo Quadra é obrigatório!" });
+    return;
+  }
+  if (lote.lote == "") {
+    Swal.swalError({ text: "Campo Lote é obrigatório!" });
+    return;
+  }
 
-    if (lote.quadra == "") {
-      alert("Campo Quadra é obrigatório!");
-      return;
+  const result = await Swal.swalConfirm(
+    "Você tem certeza que deseja Editar este lote?",
+    "",
+    "warning",
+    "Sim",
+    "Não",
+    true,
+    true
+  );
+  if (result.isConfirmed) {
+    try {
+      const result = await loteService.updateLote(lote._id, lote);
+      if (result) {
+        await Swal.swalSuccess({ text: "Lote Editado com sucesso!" });
+        isModalOpen.value = false;
+      }
+    } catch (error) {
+      console.error("Error editing lote:", error);
+      Swal.swalErrorResponse({ error });
+    } finally {
+      clearLote();
+      isUpdate.value = false;
+      getLote(lote.lote, lote.quadra);
+      await filterLotesFunction();
     }
-    if (lote.lote == "") {
-      alert("Campo Lote é obrigatório!");
-      return;
-    }
+  }
+};
 
-    const result = await loteService.updateLote(lote._id, lote);
-    if (result) {
-      alert("Lote editado com sucesso!");
-      isModalOpen.value = false;
-    } else {
-      alert("Erro ao editar lote. Verifique os dados e tente novamente.");
+const criarLotes = async (lote) => {
+  const lote_num = lote.lote;
+
+  lote = {
+    ...lote,
+    lote_num: Number(lote_num),
+  };
+
+  if (lote.quadra == "") {
+    Swal.swalError({ text: "Campo Quadra é obrigatório!" });
+    return;
+  }
+  if (lote.lote == "") {
+    Swal.swalError({ text: "Campo Lote é obrigatório!" });
+    return;
+  }
+
+  const result = await Swal.swalConfirm(
+    "Você tem certeza que deseja criar este lote?",
+    "",
+    "warning",
+    "Sim",
+    "Não",
+    true,
+    true
+  );
+  if (result.isConfirmed) {
+    try {
+      const result = await loteService.createLote(lote);
+      if (result) {
+        isModalOpen.value = false;
+        await Swal.swalSuccess({ text: "Lote Criado com sucesso!" });
+      }
+    } catch (error) {
+      console.error("Error creating lote:", error);
+      Swal.swalErrorResponse({ error });
+    } finally {
+      clearLote();
+      getLote(lote.lote, lote.quadra);
+      await filterLotesFunction();
     }
-  } catch (error) {
-    console.error("Error editing lote:", error);
-    alert("Erro ao editar lote. Verifique os dados e tente novamente.");
-  } finally {
-    clearLote();
-    isUpdate.value = false;
-    getLote(lote.lote, lote.quadra);
-    await filterLotesFunction();
   }
 };
 
@@ -268,41 +329,6 @@ const clearLote = () => {
   };
 };
 
-const criarLotes = async (lote) => {
-  const lote_num = lote.lote;
-
-  lote = {
-    ...lote,
-    lote_num: Number(lote_num),
-  };
-
-  try {
-
-    if (lote.quadra == "") {
-      alert("Campo Quadra é obrigatório!");
-      return;
-    }
-    if (lote.lote == "") {
-      alert("Campo Lote é obrigatório!");
-      return;
-    }
-
-    const result = await loteService.createLote(lote);
-    if (result) {
-      alert("Lote criado com sucesso!");
-      isModalOpen.value = false;
-    } else {
-      alert("Erro ao criar lote. Verifique os dados e tente novamente.");
-    }
-  } catch (error) {
-    console.error("Error creating lote:", error);
-    alert("Erro ao criar lote. Verifique os dados e tente novamente.");
-  } finally {
-    clearLote();
-    getLote(lote.lote, lote.quadra);
-    await filterLotesFunction();
-  }
-};
 const openEditModal = (loteEdit) => {
   isUpdate.value = true;
   lote.value = { ...loteEdit };
@@ -322,7 +348,6 @@ const closeModal = () => {
 
 const openModalFilter = () => {
   isModalFilter.value = !isModalFilter.value;
-
 };
 </script>
 

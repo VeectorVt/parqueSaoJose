@@ -1,5 +1,5 @@
-import errorsHandling from "@utils/errorsHandling.js";
-const swal = require("sweetalert2");
+import errorsHandling from "./errorsHandling.js";
+import swal from "sweetalert2";
 
 const confirmColor = "#367CFF";
 const cancelColor = "#E84747";
@@ -251,7 +251,7 @@ async function swalSuccess({ text = "", timer = 2000 } = {}) {
 // Alerta de Erro com botão de confirmação
 async function swalError({ text = "", buttonText = "OK" } = {}) {
   return await swal.fire({
-    title: "Oops!",
+    title: "Oops",
     html: text,
     icon: "error",
     confirmButtonText: buttonText,
