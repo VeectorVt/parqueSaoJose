@@ -1,4 +1,4 @@
-<!-- TODO :Criar alert usando sweetAlert , Componentizar para outras listas -->
+
 <script setup>
 const props = defineProps({
   columns: {
@@ -47,24 +47,7 @@ const props = defineProps({
   },
 });
 
-// TODO SweetAlert , Filtro e Design da tabela
-
-
-// const loteLocal = ref({});
-// const isModalOpenLocal = ref(Boolean);
-// const isUpdateLocal = ref("");
-
-// watch(lote, (val) => {
-//   loteLocal.value = val;
-// });
-
-// watch(isModalOpen, (val) => {
-//   isModalOpenLocal.value = val;
-// });
-
-// watch(isUpdate, (val) => {
-//   isUpdateLocal.value = val;
-// });
+const {filterLotes} = toRefs(props)
 
 
 const emit = defineEmits([
@@ -81,14 +64,14 @@ const emit = defineEmits([
   "openModalFilter",
 ]);
 const { lote, isModalOpen, isUpdate , isModalFilter  } = toRefs(props);
-// let isLoading = ref(false);
+
 
 function OpenModalFilter() {
  emit('openModalFilter');
-  // console.log(isModalFilter.value);
+
 }
-const dataFilterLotes = (filter) => {
-  emit("onFilter", filter);
+const dataFilterLotes = (filter , options) => {
+  emit("onFilter", filter , options);
 };
 
 const filterLotesFunction = async () => {
@@ -103,9 +86,6 @@ const criarLotes = async (lote) => {
   emit("onCreate", lote);
 };
 const openEditModal = (loteEdit) => {
-  // console.log(loteEdit);
-
-
   emit("openEditModal", loteEdit );
 };
 
@@ -117,12 +97,10 @@ const openModal = () => {
 const closeModal = () => {
   emit("toggleMenu");
    clearObj();
-  // clearLote();
 };
 
 const clearObj = () => {
   emit("clearObj");
-  // clearLote();
 };
 
 const onEdit = (loteEdit) => {
@@ -150,29 +128,6 @@ const paginationLotes = async (
   );
 };
 
-// const clearLote = () => {
-//   lote.value = {
-//     quadra: "",
-//     lote: "",
-//     status_lote: "",
-//     codigo_situacao: "",
-//     medidas: "",
-//     frente: "",
-//     fundo: "",
-//     direito: "",
-//     esquerdo: "",
-//     area_total: "",
-//     area_fr: "",
-//     area_fu: "",
-//     area_ld: "",
-//     area_le: "",
-//     inscricao_municipal: "",
-//     iptu: "",
-//     iptu_desdobramento: "",
-//     vr_lote: "",
-//     vr_metro_quadrado: "",
-//   };
-// };
 </script>
 
 <template>
@@ -189,6 +144,7 @@ const paginationLotes = async (
         <div class="text-center w-1/4">
           <SelectComponent
             :is-modal-filter="isModalFilter"
+            :filterLotes="filterLotes"
             @toggleMenu="OpenModalFilter"
             @onConfirmSelection="dataFilterLotes"
           />

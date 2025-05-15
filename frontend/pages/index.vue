@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- TODO lote_num -->
-    <!-- @openEditModal="openModalEdit" -->
     <searchComponent
       @onFilter="dataFilterLotes"
       @onEdit="editarLotes"
@@ -30,12 +28,12 @@
 <script setup>
 import loteService from "~/services/lotes.service";
 const columns = [
-  { label: "Lote", key: "lote"},
+  { label: "Lote", key: "lote" },
   { label: "Quadra", key: "quadra" },
   { label: "Status", key: "status_lote" },
   { label: "Situação", key: "codigo_situacao" },
   { label: "Medidas", key: "medidas" },
-  { label: "Frente", key: "frente" , class:'w-1/2' },
+  { label: "Frente", key: "frente", class: "w-1/2" },
   { label: "Fundo", key: "fundo" },
   { label: "Direito", key: "direito" },
   { label: "Esquerdo", key: "esquerdo" },
@@ -57,15 +55,16 @@ const filterLotes = ref([]);
 const searchPagination = ref({
   currentPage: 1,
 });
+const formattedOptions = ref([]);
 const lotes = ref([]);
 let isSearching = ref(false);
 let isLoading = ref(false);
 // Buscar lotes ao carregar a página
 const fetchLotes = async () => {
   await paginationLotes();
-  // console.log(lotes.value);
+
 };
-// isSearching = ref(false);
+
 
 let lote = ref({
   quadra: "",
@@ -91,13 +90,21 @@ let lote = ref({
 
 onMounted(async () => {
   await fetchLotes();
-  // await paginationLotes();
 });
 
+const dataFilterLotes = (filter, options = [], getLoteByCrud = false) => {
+  if (!getLoteByCrud)
+    formattedOptions.value = filter.map((option) => {
+      return {
+        value: option,
+        num: options.find((o) => o.value === option).numero,
+      };
+    });
 
-const dataFilterLotes = (filter) => {
-  filterLotes.value = filter;
-  console.log(filterLotes.value);
+filterLotes.value = getLoteByCrud
+    ? filterLotes.value
+    : [...formattedOptions.value];
+
 };
 
 const getLote = (lote, quadra) => {
@@ -105,6 +112,8 @@ const getLote = (lote, quadra) => {
     { value: "quadra", num: quadra ? quadra : "" },
     { value: "lote", num: lote ? lote : "" },
   ];
+
+  dataFilterLotes(filterLotes.value, [], true);
 };
 
 const paginationLotes = async (
@@ -141,7 +150,6 @@ const paginationLotes = async (
       isFilter: filter,
     };
 
-    console.log("search:", search);
 
     const response = await loteService.paginationLote(
       search.size,
@@ -159,7 +167,7 @@ const paginationLotes = async (
       return;
     }
 
-    console.log(response);
+
     lotes.value = response?.items;
 
     search.totalPages = response?.totalPages;
@@ -174,7 +182,7 @@ const paginationLotes = async (
     if (prevCursor) searchPagination.value.currentPage -= 1;
     if (nextCursor) searchPagination.value.currentPage += 1;
 
-    console.log("searchPagination:", searchPagination.value);
+
   } catch (error) {
     console.error("Error fetching paginated lotes:", error);
   } finally {
@@ -208,7 +216,7 @@ const deleteLotes = async (loteId) => {
 
 const editarLotes = async (lote) => {
   try {
-    console.log(lote);
+
     if (lote.quadra == "") {
       alert("Campo Quadra é obrigatório!");
       return;
@@ -269,7 +277,6 @@ const criarLotes = async (lote) => {
   };
 
   try {
-    console.log(lote);
 
     if (lote.quadra == "") {
       alert("Campo Quadra é obrigatório!");
@@ -315,12 +322,8 @@ const closeModal = () => {
 
 const openModalFilter = () => {
   isModalFilter.value = !isModalFilter.value;
-  // console.log(isModalFilter.value);
-}
 
-
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

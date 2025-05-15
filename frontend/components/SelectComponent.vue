@@ -5,13 +5,17 @@
       @click="openModal"
       class="inline-flex justify-between w-52 h-full rounded-xl border border-gray-300 shadow-sm px-7 py-3 bg-[#253D90] text-sm font-medium text-white hover:bg-blue-700"
     >
-    	
-      <label v-if="formattedOptions.length" v-for="formattedOption in formattedOptions" :key="formattedOption.value">
-        {{ formattedOption.value.toUpperCase() }}:<br>{{ formattedOption.num }} ; 
+      <label
+        v-if="filterLotes.length"
+        v-for="formattedOption in filterLotes"
+        :key="formattedOption.value"
+      >
+        {{ formattedOption.value.toUpperCase() }}:<br />{{
+          formattedOption.num
+        }}
+        ;
       </label>
-      <label v-else for="">
-        Filtro...
-      </label>
+      <label v-else for=""> Filtro... </label>
       <!-- Ícone de dropdown (opcional) -->
       <svg
         class="ml-2 h-5 w-5"
@@ -35,10 +39,7 @@
         class="fixed inset-0 flex items-center justify-center z-50"
       >
         <!-- Fundo semi-transparente -->
-        <div
-          class="fixed inset-0 bg-black opacity-50"
-          @click="openModal"
-        ></div>
+        <div class="fixed inset-0 bg-black opacity-50" @click="openModal"></div>
 
         <!-- Conteúdo do modal -->
         <div class="bg-white rounded-md p-4 shadow-lg z-50 max-w-xs w-full">
@@ -88,16 +89,18 @@
 </template>
 
 <script setup>
-defineProps({
+// TODO Adicionar reatividade para os campos quando for feita a pesquisa através da requisição
+const props = defineProps({
   isModalFilter: {
     type: Boolean,
     required: true,
   },
+  filterLotes: {
+    type: Array,
+    required: false,
+    default: () => [],
+  },
 });
-
-const emit = defineEmits(["toggleMenu", "onConfirmSelection"]);
-// Controle do estado do modal
-
 // Lista de opções para o checklist
 const options = ref([
   { label: "Por Lote", value: "lote", numero: "" },
@@ -106,7 +109,14 @@ const options = ref([
 
 // Opções selecionadas
 const selectedOptions = ref([]);
-let formattedOptions = ref([]);
+// let formattedOptions = ref([]);
+
+const emit = defineEmits([
+  "toggleMenu",
+  "onConfirmSelection",
+]);
+const { filterLotes } = toRefs(props);
+
 // Abre e fecha modal
 const openModal = () => {
   emit("toggleMenu");
@@ -114,28 +124,10 @@ const openModal = () => {
 
 // Confirma a seleção e fecha o modal
 const confirmSelection = () => {
- 
-
-  formattedOptions.value = selectedOptions.value.map((option) => {
-  return {
-    value: option,
-    num: options.value.find((o) => o.value === option).numero,
-  };
-});
-openModal();
-emit("onConfirmSelection", formattedOptions.value);
-
+  emit("onConfirmSelection", selectedOptions.value, options.value);
+  openModal();
 };
 
-// Computa o texto do botão com base nas opções selecionadas
-// const selectedOptionsText = computed(() => {
-//   if (selectedOptions.value.length === 0) return "Filtro...";
-  // if (selectedOptions.value.length > 2) {
-  //   return `${selectedOptions.value.length} opções selecionadas`;
-  // }
-
-  // return selectedOptions.value.join(", ");
-// });
 </script>
 
 <style scoped>
