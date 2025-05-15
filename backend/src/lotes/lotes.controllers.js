@@ -82,8 +82,11 @@ exports.paginationLote = async (req, res) => {
     const { quadra, lote } = req.query;
 
     const baseFilter = {};
-    if (quadra) baseFilter.quadra = quadra.trim();
-    if (lote) baseFilter.lote_num = Number(lote);
+    if (quadra && typeof quadra == 'string') baseFilter.quadra = quadra.trim();
+    if (quadra && typeof quadra == 'number') baseFilter.quadra = Number(quadra);
+    if (lote && typeof lote == 'string') baseFilter.lote = lote.trim();
+    if (lote && typeof lote == 'number') baseFilter.lote = Number(lote);
+    // if (lote) baseFilter.lote_num = Number(lote);
 
     let queryFilter = { ...baseFilter };
 

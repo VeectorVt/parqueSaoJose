@@ -8,6 +8,7 @@ const Schema = mongoose.Schema
 const lotesSchema = new Schema({
     quadra: { type: String, required: [true, "O campo quadra é obrigatório"] },
     lote: { type: String, required: [true, "O campo lote é obrigatório"]  },
+    lote_num: { type: Number, required: [true, "O campo lote é obrigatório"]  },
     area_total: { type: String },
     frente: { type: String },
     area_fr: { type: String },
