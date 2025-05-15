@@ -1,22 +1,28 @@
 <template>
   <div>
-     <!-- @openEditModal="openModalEdit" -->
+    <!-- TODO lote_num -->
+    <!-- @openEditModal="openModalEdit" -->
     <searchComponent
       @onFilter="dataFilterLotes"
       @onEdit="editarLotes"
-     
+      @openEditModal="openEditModal"
       @onDelete="deleteLotes"
       @onFilterFunc="filterLotesFunction"
       @onCreate="criarLotes"
       @clearObj="clearLote"
       @paginationLotes="paginationLotes"
+      @toggleMenu="closeModal"
+      @openModal="openModal"
+      @openModalFilter="openModalFilter"
       :searchPagination="searchPagination"
       :isLoading="isLoading"
       :columns="columns"
       :lotes="lotes"
       :lote="lote"
       :isModalOpen="isModalOpen"
-    :isUpdate="isUpdate"
+      :isUpdate="isUpdate"
+      :isModalFilter="isModalFilter"
+      :filterLotes="filterLotes"
     />
   </div>
 </template>
@@ -24,12 +30,12 @@
 <script setup>
 import loteService from "~/services/lotes.service";
 const columns = [
-  { label: "Lote", key: "lote" },
+  { label: "Lote", key: "lote"},
   { label: "Quadra", key: "quadra" },
   { label: "Status", key: "status_lote" },
   { label: "Situação", key: "codigo_situacao" },
   { label: "Medidas", key: "medidas" },
-  { label: "Frente", key: "frente" },
+  { label: "Frente", key: "frente" , class:'w-1/2' },
   { label: "Fundo", key: "fundo" },
   { label: "Direito", key: "direito" },
   { label: "Esquerdo", key: "esquerdo" },
@@ -45,7 +51,7 @@ const columns = [
   { label: "Vr m²", key: "vr_metro_quadrado" },
 ];
 const isModalOpen = ref(false);
-// const isModalFilter = ref(false);
+const isModalFilter = ref(false);
 const isUpdate = ref(false);
 const filterLotes = ref([]);
 const searchPagination = ref({
@@ -88,13 +94,17 @@ onMounted(async () => {
   // await paginationLotes();
 });
 
-// function OpenModalFilter() {
-//   isModalFilter.value = !isModalFilter.value;
-//   // console.log(isModalFilter.value);
-// }
+
 const dataFilterLotes = (filter) => {
   filterLotes.value = filter;
   console.log(filterLotes.value);
+};
+
+const getLote = (lote, quadra) => {
+  filterLotes.value = [
+    { value: "quadra", num: quadra ? quadra : "" },
+    { value: "lote", num: lote ? lote : "" },
+  ];
 };
 
 const paginationLotes = async (
@@ -196,7 +206,6 @@ const deleteLotes = async (loteId) => {
   }
 };
 
-
 const editarLotes = async (lote) => {
   try {
     console.log(lote);
@@ -222,7 +231,8 @@ const editarLotes = async (lote) => {
   } finally {
     clearLote();
     isUpdate.value = false;
-    await fetchLotes();
+    getLote(lote.lote, lote.quadra);
+    await filterLotesFunction();
   }
 };
 
@@ -251,6 +261,13 @@ const clearLote = () => {
 };
 
 const criarLotes = async (lote) => {
+  const lote_num = lote.lote;
+
+  lote = {
+    ...lote,
+    lote_num: Number(lote_num),
+  };
+
   try {
     console.log(lote);
 
@@ -275,37 +292,35 @@ const criarLotes = async (lote) => {
     alert("Erro ao criar lote. Verifique os dados e tente novamente.");
   } finally {
     clearLote();
-    await fetchLotes();
+    getLote(lote.lote, lote.quadra);
+    await filterLotesFunction();
   }
 };
-// const openEditModal = (loteEdit) => {
-//   console.log(loteEdit);
+const openEditModal = (loteEdit) => {
+  isUpdate.value = true;
+  lote.value = { ...loteEdit };
+  isModalOpen.value = true;
+};
 
-//   isUpdate.value = true;
-//   lote.value = { ...loteEdit };
-//   isModalOpen.value = true;
-// };
+const openModal = () => {
+  clearLote();
+  isUpdate.value = false;
+  isModalOpen.value = true;
+};
 
-// const openModal = () => {
-//   clearLote();
-//   isUpdate.value = false;
-//   isModalOpen.value = true;
-// };
+const closeModal = () => {
+  isModalOpen.value = false;
+  clearLote();
+};
+
+const openModalFilter = () => {
+  isModalFilter.value = !isModalFilter.value;
+  // console.log(isModalFilter.value);
+}
+
+
 </script>
 
 <style scoped>
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
 
-th,
-td {
-  padding: 8px;
-}
-
-th {
-  background-color: #f4f4f4;
-}
 </style>

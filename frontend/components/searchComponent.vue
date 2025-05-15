@@ -37,26 +37,34 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  filterLotes: {
+    type: Array,
+    default: () => [],
+  },
+  isModalFilter: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-// TODO Corrigir o problema de reatividade , Testar Crud componentizado
-const { lote, isModalOpen, isUpdate } = toRefs(props);
+// TODO SweetAlert , Filtro e Design da tabela
 
-const loteLocal = ref({});
-const isModalOpenLocal = ref(Boolean);
-const isUpdateLocal = ref(Boolean);
 
-watch(lote, (val) => {
-  loteLocal.value = val;
-});
+// const loteLocal = ref({});
+// const isModalOpenLocal = ref(Boolean);
+// const isUpdateLocal = ref("");
 
-watch(isModalOpen, (val) => {
-  isModalOpenLocal.value = val;
-});
+// watch(lote, (val) => {
+//   loteLocal.value = val;
+// });
 
-watch(isUpdate, (val) => {
-  isUpdateLocal.value = val;
-});
+// watch(isModalOpen, (val) => {
+//   isModalOpenLocal.value = val;
+// });
+
+// watch(isUpdate, (val) => {
+//   isUpdateLocal.value = val;
+// });
 
 
 const emit = defineEmits([
@@ -67,27 +75,24 @@ const emit = defineEmits([
   "onFilterFunc",
   "clearObj",
   "paginationLotes",
+  "openEditModal",
+  "openModal",
+  "toggleMenu",
+  "openModalFilter",
 ]);
-
-const isModalFilter = ref(false);
-const filterLotes = ref([]);
-
-
-
-let isLoading = ref(false);
+const { lote, isModalOpen, isUpdate , isModalFilter  } = toRefs(props);
+// let isLoading = ref(false);
 
 function OpenModalFilter() {
-  isModalFilter.value = !isModalFilter.value;
+ emit('openModalFilter');
   // console.log(isModalFilter.value);
 }
 const dataFilterLotes = (filter) => {
-  filterLotes.value = filter;
-
-  emit("onFilter", filterLotes.value);
+  emit("onFilter", filter);
 };
 
 const filterLotesFunction = async () => {
-  emit("onFilterFunc", filterLotes.value);
+  emit("onFilterFunc");
 };
 
 const criarLotes = async (lote) => {
@@ -98,17 +103,21 @@ const criarLotes = async (lote) => {
   emit("onCreate", lote);
 };
 const openEditModal = (loteEdit) => {
-  console.log(loteEdit);
+  // console.log(loteEdit);
 
-  isUpdate.value = true;
-  isModalOpen.value = true;
-  lote.value = loteEdit;
+
+  emit("openEditModal", loteEdit );
 };
 
 const openModal = () => {
   clearObj();
-  isUpdate.value = false;
-  isModalOpen.value = true;
+  emit("openModal");
+};
+
+const closeModal = () => {
+  emit("toggleMenu");
+   clearObj();
+  // clearLote();
 };
 
 const clearObj = () => {
@@ -141,29 +150,29 @@ const paginationLotes = async (
   );
 };
 
-const clearLote = () => {
-  lote.value = {
-    quadra: "",
-    lote: "",
-    status_lote: "",
-    codigo_situacao: "",
-    medidas: "",
-    frente: "",
-    fundo: "",
-    direito: "",
-    esquerdo: "",
-    area_total: "",
-    area_fr: "",
-    area_fu: "",
-    area_ld: "",
-    area_le: "",
-    inscricao_municipal: "",
-    iptu: "",
-    iptu_desdobramento: "",
-    vr_lote: "",
-    vr_metro_quadrado: "",
-  };
-};
+// const clearLote = () => {
+//   lote.value = {
+//     quadra: "",
+//     lote: "",
+//     status_lote: "",
+//     codigo_situacao: "",
+//     medidas: "",
+//     frente: "",
+//     fundo: "",
+//     direito: "",
+//     esquerdo: "",
+//     area_total: "",
+//     area_fr: "",
+//     area_fu: "",
+//     area_ld: "",
+//     area_le: "",
+//     inscricao_municipal: "",
+//     iptu: "",
+//     iptu_desdobramento: "",
+//     vr_lote: "",
+//     vr_metro_quadrado: "",
+//   };
+// };
 </script>
 
 <template>
@@ -211,7 +220,7 @@ const clearLote = () => {
         Adicionar Novo Lote
       </button>
       <ListasModalComponentLote
-        @toggleMenu="isModalOpen = !isModalOpen"
+        @toggleMenu="closeModal"
         @onConfirmSelection="criarLotes"
         :lote="lote"
         :is-modal-open="isModalOpen"

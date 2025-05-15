@@ -6,12 +6,13 @@
     >
       <thead>
         <tr class="bg-gray-100 text-gray-700 text-left">
-          <th  class="px-4 py-2 border-r border-b w-26">Ações</th>
+          <th  class="px-4 py-2 border-r border-b w-12">Ações</th>
           <th
             v-for="(column, index) in columns"
             :key="index"
-            class="px-4 py-2 border-r border-b"
+            :class="['px-4', 'py-2', 'border-r', 'border-b', column.class]"
           >
+            {{ column.class }}
             {{ column.label }}
           </th>
         </tr>
@@ -93,3 +94,22 @@ const onDelete = (id) => {
 
 // const hasActions = !!(typeof onEdit === 'function' || typeof onDelete === 'function');
 </script>
+
+<style scoped>
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th,
+td {
+  padding: 8px;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+</style>

@@ -7,7 +7,7 @@
     >
     	
       <label v-if="formattedOptions.length" v-for="formattedOption in formattedOptions" :key="formattedOption.value">
-        {{ formattedOption.value.toUpperCase() }}:{{ formattedOption.num }} ; 
+        {{ formattedOption.value.toUpperCase() }}:<br>{{ formattedOption.num }} ; 
       </label>
       <label v-else for="">
         Filtro...
