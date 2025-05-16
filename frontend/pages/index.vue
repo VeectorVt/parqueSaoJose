@@ -29,12 +29,31 @@
 import loteService from "~/services/lotes.service";
 import Swal from "~/components/utils/customSwal";
 const columns = [
-  { label: "Lote", key: "lote" },
-  { label: "Quadra", key: "quadra" },
-  { label: "Status", key: "status_lote" },
-  { label: "Situação", key: "codigo_situacao" },
+  {
+    label: "Lote",
+    key: "lote",
+    class: "min-w-[80px]",
+    class2: "sticky left-[100px] z-10 bg-white min-w-[60px] border-r-2",
+    class3:'left-[100px] z-30 border-r-2 '
+  },
+  {
+    label: "Quadra",
+    key: "quadra",
+    class: "min-w-[80px]",
+    class2: "sticky left-[170px] z-10 bg-white min-w-[60px] border-r-2",
+     class3:'left-[170px] z-30 border-r-2'
+  },
+  { label: "Status", key: "status_lote", class: "min-w-[60px]" },
+  { label: "Situação", key: "codigo_situacao", class: "min-w-[50px]" },
   { label: "Medidas", key: "medidas" },
-  { label: "Frente", key: "frente", class:  'w-[530px]' },
+  {
+    label: "Frente",
+    key: "frente",
+    class: "min-w-[150px]",
+  },
+  { label: "Fundo", key: "fundo" },
+  { label: "Direito", key: "direito" },
+  { label: "Esquerdo", key: "esquerdo" },
   { label: "Fundo", key: "fundo" },
   { label: "Direito", key: "direito" },
   { label: "Esquerdo", key: "esquerdo" },
