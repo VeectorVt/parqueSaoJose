@@ -1,148 +1,145 @@
+// controllers/vendaController.js
 const mongoose = require('mongoose');
-const Venda = require('./venda.model')
+const Venda = require('../models/Venda');
 
-exports.returnAllVendas = async (req, res) => {
+const DEFAULT_PAGE_SIZE = 25;
+
+// Helper para aplicar populates
+const applyPopulates = (query) =>
+  query
+    .populate('lote')
+    .populate('baixas')
+    .populate({ path: 'sequenciais', populate: 'codigo_andamento' });
+
+exports.createVenda = async (req, res) => {
   try {
-    const venda = await Venda.find()
-
-    await res.json(venda)
-  } catch (error) {
-    res.status(400).json({ message: err });
-  }
-}
-exports.registerNewVenda = async (req, res) => {
-  try {
-    const newVenda = new Venda(req.body);
-    const venda = await newVenda.save();
-
-    res.status(201).json({ message: 'Venda cadastrada com sucesso', venda });
+    const venda = await Venda.create(req.body);
+    // já popular o novo documento
+    const fullVenda = await applyPopulates(Venda.findById(venda._id));
+    return res.status(201).json(fullVenda);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      const messages = Object.values(err.errors).map(val => val.message);
+      const messages = Object.values(err.errors).map((e) => e.message);
       return res.status(400).json({ message: 'Erro de validação', errors: messages });
     }
-    res.status(400).json({ message: 'Erro ao cadastrar venda', error: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
-exports.returnEditVenda = async (req, res) => {
+exports.getAllVendas = async (req, res) => {
   try {
-    const vendaAtualizada = await Venda.findByIdAndUpdate(
+    const vendas = await applyPopulates(Venda.find());
+    return res.json(vendas);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getVendaById = async (req, res) => {
+  try {
+    const venda = await applyPopulates(Venda.findById(req.params.id));
+    if (!venda) return res.status(404).json({ message: 'Venda não encontrada' });
+    return res.json(venda);
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+exports.updateVenda = async (req, res) => {
+  try {
+    const venda = await Venda.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
+    if (!venda) return res.status(404).json({ message: 'Venda não encontrada' });
 
-    if (!vendaAtualizada) {
-      return res.status(404).json({ message: 'Venda não encontrada' });
+    // retornar populado
+    const fullVenda = await applyPopulates(Venda.findById(venda._id));
+    return res.json(fullVenda);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map((e) => e.message);
+      return res.status(400).json({ message: 'Erro de validação', errors: messages });
     }
-
-    return res.status(200).json({
-      message: 'Venda atualizada com sucesso',
-      venda: vendaAtualizada
-    });
-  } catch (error) {
-    console.error('Erro ao atualizar venda:', error);
-    return res.status(500).json({
-      message: 'Erro ao atualizar venda',
-      error: error.message
-    });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 exports.deleteVenda = async (req, res) => {
   try {
     const venda = await Venda.findByIdAndDelete(req.params.id);
-
-    if (!venda) {
-      return res.status(404).json({ message: 'Venda não encontrada' });
-    }
-
-    return res.status(200).json({ message: 'Venda apagada com sucesso', venda });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Erro ao apagar venda', error: error.message });
+    if (!venda) return res.status(404).json({ message: 'Venda não encontrada' });
+    return res.json({ message: 'Venda removida com sucesso' });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 
 exports.paginationVenda = async (req, res) => {
   try {
-    const size = parseInt(req.query.size, 10) || 25;
+    const size = parseInt(req.query.size, 10) || DEFAULT_PAGE_SIZE;
     const cursor = req.query.cursor || null;
     const prevCursor = req.query.prevCursor || null;
-    const lastPage = req.query.lastPage || null;
-    const firstPage = req.query.firstPage || null;
+    const lastPage = req.query.lastPage === 'true';
+    const firstPage = req.query.firstPage === 'true';
 
-    // Adapte os filtros conforme os campos do schema de Venda
-    const { quadra, lote } = req.query;
-
+    // filtros opcionais
     const baseFilter = {};
-    if (quadra && typeof quadra == 'string') baseFilter.quadra = quadra.trim();
-    if (quadra && typeof quadra == 'number') baseFilter.quadra = Number(quadra);
-    if (lote && typeof lote == 'string') baseFilter.lote = lote.trim();
-    if (lote && typeof lote == 'number') baseFilter.lote = Number(lote);
+    if (req.query.quadra) baseFilter.quadra = req.query.quadra;
+    if (req.query.lote)   baseFilter.lote = req.query.lote;
 
-    let queryFilter = { ...baseFilter };
-
-    const totalCount = await Venda.countDocuments(queryFilter);
+    const totalCount = await Venda.countDocuments(baseFilter);
     const totalPages = Math.ceil(totalCount / size);
 
-    let items = [];
-    let sortOrder = { _id: 1 };
+    // achar primeiro e último _id dentro do filtro
+    const firstItem = await Venda.findOne(baseFilter).sort({ _id: 1 }).select('_id');
+    const lastItem  = await Venda.findOne(baseFilter).sort({ _id: -1 }).select('_id');
 
-    const firstItem = await Venda.findOne(queryFilter).sort({ _id: 1 }).select('_id');
-    const lastItem = await Venda.findOne(queryFilter).sort({ _id: -1 }).select('_id');
+    let query = Venda.find(baseFilter);
+    let skip, items;
 
     if (lastPage) {
       const remainder = totalCount % size;
-      const skipCount = remainder === 0 ? totalCount - size : totalCount - remainder;
-      items = await Venda.find(queryFilter)
-        .sort({ _id: 1 })
-        .skip(skipCount)
-        .limit(size);
-    } else if (firstPage) {
-      items = await Venda.find(queryFilter)
-        .sort({ _id: 1 })
-        .limit(size);
-    } else if (cursor) {
-      queryFilter._id = { $gt: mongoose.Types.ObjectId(cursor) };
-      items = await Venda.find(queryFilter)
-        .sort({ _id: 1 })
-        .limit(size);
-    } else if (prevCursor) {
-      queryFilter._id = { $lt: mongoose.Types.ObjectId(prevCursor) };
-      items = await Venda.find(queryFilter)
-        .sort({ _id: -1 })
-        .limit(size);
-
+      skip = remainder === 0 ? totalCount - size : totalCount - remainder;
+      items = await query.sort({ _id: 1 }).skip(skip).limit(size);
+    }
+    else if (firstPage) {
+      items = await query.sort({ _id: 1 }).limit(size);
+    }
+    else if (cursor) {
+      query = query.where('_id').gt(mongoose.Types.ObjectId(cursor));
+      items = await query.sort({ _id: 1 }).limit(size);
+    }
+    else if (prevCursor) {
+      query = query.where('_id').lt(mongoose.Types.ObjectId(prevCursor));
+      items = await query.sort({ _id: -1 }).limit(size);
       items = items.reverse();
-    } else {
-      items = await Venda.find(queryFilter)
-        .sort({ _id: 1 })
-        .limit(size);
+    }
+    else {
+      items = await query.sort({ _id: 1 }).limit(size);
     }
 
-    const nextCursorCalc = items.length ? items[items.length - 1]._id.toString() : null;
-    const prevCursorCalc = items.length ? items[0]._id.toString() : null;
+    // popular resultados
+    items = await applyPopulates(Venda.find({ _id: { $in: items.map(i => i._id) } }));
 
-    const verifyFirstPage = prevCursorCalc === firstItem?._id.toString();
-    const verifyLastPage = nextCursorCalc === lastItem?._id.toString();
+    const nextCursor = items.length ? items[items.length - 1]._id.toString() : null;
+    const prevCur    = items.length ? items[0]._id.toString() : null;
 
-    return res.status(200).json({
+    const atFirst = prevCur === firstItem?._id.toString();
+    const atLast  = nextCursor === lastItem?._id.toString();
+
+    return res.json({
       totalCount,
       totalPages,
-      message: 'Vendas encontradas com sucesso',
-      items,
       pageSize: size,
-      nextCursor: nextCursorCalc,
-      prevCursor: prevCursorCalc,
-      hasMoreNext: nextCursorCalc !== null && !verifyLastPage,
-      hasMorePrev: prevCursorCalc !== null && !verifyFirstPage
+      items,
+      nextCursor,
+      prevCursor: prevCur,
+      hasMoreNext: !!nextCursor && !atLast,
+      hasMorePrev: !!prevCur   && !atFirst
     });
-
-  } catch (error) {
-    console.error('Erro ao buscar vendas:', error);
-    return res.status(500).json({ message: 'Erro ao buscar vendas', error: error.message });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
-

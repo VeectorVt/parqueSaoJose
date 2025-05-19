@@ -1,42 +1,54 @@
 const mongoose = require('mongoose');
-
 const Schema = mongoose.Schema;
 
 const vendaSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId },
-  bairro: { type: String },
-  baixa: { type: String },
-  cep: { type: String },
-  cidade: { type: String },
-  codigo_conta: { type: String },
-  codigo_situacao: { type: String },
-  condicao: { type: String },
-  cpf: { type: String },
-  data_venda: { type: String },
-  endereco: { type: String },
-  estado_civil: { type: String },
-  identidade: { type: String },
-  indexador: { type: String },
-  lote: { type: String },
-  moeda: { type: String },
-  nacionalidade: { type: String },
-  nome: { type: String },
-  nr_documento: { type: String },
-  observacao1: { type: String },
-  observacao2: { type: String },
-  observacao3: { type: String },
-  observacao4: { type: String },
-  parcela: { type: Number },
-  quadra: { type: String },
-  sinal: { type: String },
-  telefone: { type: String },
-  uf: { type: String },
-  valor: { type: String }
+  lote: { type: mongoose.Schema.Types.ObjectId, ref: 'Lotes', required: true },
+  bairro: String,
+  baixa: String,
+  cep: String,
+  cidade: String,
+  codigo_conta: String,
+  codigo_situacao: String,
+  condicao: String,
+  cpf: String,
+  data_venda: String,
+  endereco: String,
+  estado_civil: String,
+  identidade: String,
+  indexador: String,
+  moeda: String,
+  nacionalidade: String,
+  nome: String,
+  nr_documento: { type: String, required: true, unique: true },
+  observacao1: String,
+  observacao2: String,
+  observacao3: String,
+  observacao4: String,
+  parcela: Number,
+  quadra: String,
+  sinal: String,
+  telefone: String,
+  uf: String,
+  valor: String
 }, {
   timestamps: true,
-  collection: 'venda'
+  collection: 'venda',
 });
 
-const Venda = mongoose.model('Venda', vendaSchema);
+// Virtual populate for Baixas and Sequenciais
+vendaSchema.virtual('baixas', {
+  ref: 'Baixa',
+  localField: '_id',
+  foreignField: 'venda'
+});
 
-module.exports = Venda;
+vendaSchema.virtual('sequenciais', {
+  ref: 'Sequencial',
+  localField: '_id',
+  foreignField: 'venda'
+});
+
+vendaSchema.set('toObject', { virtuals: true });
+vendaSchema.set('toJSON', { virtuals: true });
+
+module.exports = mongoose.model('Venda', vendaSchema);
