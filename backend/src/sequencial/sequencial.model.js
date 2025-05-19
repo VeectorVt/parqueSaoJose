@@ -2,23 +2,20 @@
 
 
 const mongoose = require('mongoose');
-
 const Schema = mongoose.Schema;
 
 const sequencialSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId },
-  andamento: { type: String },
-  chave: { type: String },
-  codigo_andamento: { type: String },
-  estacao: { type: String },
-  identificacao: { type: String },
-  valor: { type: String },
-  valor_anterior: { type: String }
+  venda: { type: mongoose.Schema.Types.ObjectId, ref: 'Venda' },
+  andamento: String,
+  chave: String,
+  codigo_andamento: { type: mongoose.Schema.Types.ObjectId, ref: 'Andamento' },
+  estacao: String,
+  identificacao: String,
+  valor: String,
+  valor_anterior: String
 }, {
   timestamps: true,
   collection: 'sequencial',
 });
 
-const Sequencial = mongoose.model('Sequencial', sequencialSchema);
-
-module.exports = Sequencial;
+module.exports = mongoose.model('Sequencial', sequencialSchema);
