@@ -1,7 +1,7 @@
 // controllers/baixaController.js
 const mongoose = require('mongoose');
-const Baixa = require('../models/Baixa');
-const Venda = require('../models/Venda');
+const Baixa = require('./baixa.model');
+const Venda = require('../venda/venda.model');
 
 const applyBaixaPopulates = (query) =>
   query

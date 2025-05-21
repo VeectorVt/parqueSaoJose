@@ -1,8 +1,8 @@
 // controllers/sequencialController.js
 const mongoose = require('mongoose');
-const Sequencial = require('../models/Sequencial');
-const Venda = require('../models/Venda');
-const Andamento = require('../models/Andamento');
+const Sequencial = require('./sequencial.model');
+const Venda = require('../venda/venda.model');
+const Andamento = require('../andamento/andamento.model');
 
 const applySequencialPopulates = (query) =>
   query
