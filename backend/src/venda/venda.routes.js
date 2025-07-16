@@ -6,11 +6,13 @@ const router = express.Router()
 const venda = require('./venda.controllers')
 // const auth = require('../middlewares/auth')
 
+const resolveLoteId = require('../middlewares/resolveLoteId');
+
 router.get('/venda', venda.getAllVendas)
 
-router.post('/register/venda', venda.createVenda);
+router.post('/vendas', resolveLoteId, createVenda);
+router.put('/vendas/:id', resolveLoteId, updateVenda);
 
-router.put('/edit/venda/:id', venda.updateVenda);
 
 router.delete('/delete/venda/:id', venda.deleteVenda);
 

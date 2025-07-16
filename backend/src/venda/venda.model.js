@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const vendaSchema = new Schema({
-  lote: { type: mongoose.Schema.Types.ObjectId, ref: 'Lotes', required: true },
+  lote: { type: String, required: true },
+  lote_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Lotes' },
   bairro: String,
   baixa: String,
   cep: String,
