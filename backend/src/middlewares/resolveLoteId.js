@@ -11,3 +11,4 @@ async function resolveLote(req, res, next) {
   }
   next();
 }
+module.exports = resolveLote;

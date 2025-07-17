@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Venda = require('./venda.model');
 const Baixa = require('../baixa/baixa.model');
 const Sequencial = require('../sequencial/sequencial.model');
-const Lote = require('../lote/lote.model');
+const Lote = require('../lotes/lotes.model');
 const DEFAULT_PAGE_SIZE = 25;
 
 // Função para buscar lote por quadra e número

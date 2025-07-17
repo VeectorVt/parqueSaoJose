@@ -10,9 +10,12 @@ const resolveLoteId = require('../middlewares/resolveLoteId');
 
 router.get('/venda', venda.getAllVendas)
 
-router.post('/vendas', resolveLoteId, createVenda);
-router.put('/vendas/:id', resolveLoteId, updateVenda);
+// Buscar venda por ID
+router.get('/vendas/:id', venda.getVendaById);
 
+router.post('/vendas', resolveLoteId, venda.createVenda);
+
+router.put('/vendas/:id', resolveLoteId, venda.updateVenda);
 
 router.delete('/delete/venda/:id', venda.deleteVenda);
 
