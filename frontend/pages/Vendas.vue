@@ -15,6 +15,7 @@
       :searchPagination="searchPagination"
       :isLoading="isLoading"
       :columns="columns"
+      
       :vendas="vendas"
       :venda="venda"
       :isModalOpen="isModalOpen"
@@ -22,6 +23,7 @@
       :isModalFilter="isModalFilter"
       :filterVendas="filterVendas"
     />
+
   </div>
 </template>
 
@@ -163,6 +165,7 @@ const paginationVendas = async (
     }
 
     vendas.value = response?.items;
+    console.log("Vendas:", vendas.value);
 
     search.totalPages = response?.totalPages;
     search.totalItens = response?.totalItens;
