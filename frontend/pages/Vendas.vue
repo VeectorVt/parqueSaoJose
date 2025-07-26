@@ -8,7 +8,7 @@
       @onFilterFunc="filterVendasFunction"
       @onCreate="criarVendas"
       @clearObj="clearVenda"
-      @paginationVendas="paginationVendas"
+      @pagination="paginationVendas"
       @toggleMenu="closeModal"
       @openModal="openModal"
       @openModalFilter="openModalFilter"

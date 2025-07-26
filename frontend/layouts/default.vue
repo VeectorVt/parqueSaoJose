@@ -10,7 +10,7 @@
       <!-- Conteúdo Principal -->
     </div>
     <!-- </transition> -->
-    <div class="flex min-w-[80%] min-h-screen flex-col">
+    <div class="flex min-w-[80%] w-[100vw] min-h-screen flex-col">
       <header class="bg-blue-500 text-white p-4 text-center">
         <nav class="flex justify-between items-center">
           <HamburguerComponent

@@ -3,6 +3,16 @@
 /* *{
 width: 2vw;
 }  */
+* {
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  box-sizing: border-box;
+}
+
+html, body, #__nuxt {
+  height: 100%;
+}
 
 .btn-disable {
   background-color: #ccc;

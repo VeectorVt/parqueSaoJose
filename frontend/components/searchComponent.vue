@@ -1,11 +1,22 @@
 
 <script setup>
+// TODO
+// Generalizar props no lugar de lotes e vendas usar items e item
+// Generalizar emits no lugar de onEdit, onDelete usar onAction
+// Generalizar Modais
+// Usar lógica especifica no componente pai para definir se é lote ou venda
+// Usar slots para os modais
+
 const props = defineProps({
   columns: {
     type: Array,
     required: true,
   },
   lotes: {
+    type: Array,
+    default: () => [],
+  },
+  vendas: {
     type: Array,
     default: () => [],
   },
@@ -45,6 +56,15 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  
+});
+
+const isLote = computed(() => {
+  return props.lotes.length > 0;
+});
+
+const title = computed(() => {
+  return isLote.value ? "Lotes" : "Vendas";
 });
 
 const {filterLotes} = toRefs(props)
@@ -57,7 +77,7 @@ const emit = defineEmits([
   "onFilter",
   "onFilterFunc",
   "clearObj",
-  "paginationLotes",
+  "pagination",
   "openEditModal",
   "openModal",
   "toggleMenu",
@@ -111,7 +131,7 @@ const onDelete = (loteId) => {
   emit("onDelete", loteId);
 };
 
-const paginationLotes = async (
+const pagination = async (
   prevCursor,
   lastPage = "",
   firstPage = "",
@@ -119,7 +139,7 @@ const paginationLotes = async (
   nextCursor
 ) => {
   await emit(
-    "paginationLotes",
+    "pagination",
     prevCursor,
     lastPage,
     firstPage,
@@ -132,9 +152,9 @@ const paginationLotes = async (
 
 <template>
   <div>
-    <h1 class="text-xl text-center font-semibold text-gray-900">Lotes</h1>
+    <h1 class="text-xl text-center font-semibold text-gray-900">{{ title }}</h1>
     <h2 class="text-md text-center text-gray-600 mb-5">
-      Lista de Todos os Lotes:
+      Lista de {{ isLote ? "Lotes" : "Vendas" }}
     </h2>
   </div>
   <div class="p-5 bg-white shadow-2xl rounded-lg">
@@ -173,7 +193,7 @@ const paginationLotes = async (
         class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
         @click="openModal"
       >
-        Adicionar Novo Lote
+        Adicionar Nova Venda
       </button>
       <ListasModalComponentLote
         @toggleMenu="closeModal"
@@ -185,10 +205,19 @@ const paginationLotes = async (
     </div>
 
     <tableComponent
+      v-if="lotes.length > 0"
       @onEdit="openEditModal"
       @onDelete="onDelete"
       :columns="columns"
       :rows="lotes"
+      :isLoading="isLoading"
+    />
+     <!-- @onEdit="openEditModal"
+      @onDelete="onDelete" -->
+      <tableComponent
+      v-if="vendas.length > 0"
+      :columns="columns"
+      :rows="vendas"
       :isLoading="isLoading"
     />
 
@@ -201,7 +230,7 @@ const paginationLotes = async (
             ? 'btn-disable'
             : 'hover:bg-blue-700 transition',
         ]"
-        @click="paginationLotes(false, '', true)"
+        @click="pagination(false, '', true)"
       >
         <!-- First Item  -->
         <svg
@@ -233,7 +262,7 @@ const paginationLotes = async (
             ? 'btn-disable'
             : 'hover:bg-blue-700 transition',
         ]"
-        @click="paginationLotes(true)"
+        @click="pagination(true)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -261,7 +290,7 @@ const paginationLotes = async (
             ? 'btn-disable'
             : 'hover:bg-blue-700 transition',
         ]"
-        @click="paginationLotes(false, '', '', '', true)"
+        @click="pagination(false, '', '', '', true)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -292,7 +321,7 @@ const paginationLotes = async (
             ? 'btn-disable'
             : 'hover:bg-blue-700 transition',
         ]"
-        @click="paginationLotes(false, true)"
+        @click="pagination(false, true)"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

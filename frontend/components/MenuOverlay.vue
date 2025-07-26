@@ -32,37 +32,44 @@
       <nav class="mt-5">
         <ul class="space-y-2">
           <li>
-            <a
-              :class="[isActive === 'lotes' ? 'bg-[#ffc20e] text-black' : '']"
-              @click="toggleItens('lotes')"
-              href="#"
-              class="flex items-center space-x-3 p-2 rounded-lg active:bg-yellow-700"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <NuxtLink to="/">
+              <a
+                :class="[isActive === 'lotes' ? 'bg-[#ffc20e] text-black' : '']"
+                @click="toggleItens('lotes')"
+                href="#"
+                class="flex items-center space-x-3 p-2 rounded-lg active:bg-yellow-700"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
-              <span>Consulta de Lotes</span>
-            </a>
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+                <span>Consulta de Lotes</span>
+              </a>
+            </NuxtLink>
           </li>
           <!-- Repetir para outros itens -->
           <li>
-            <a
-              :class="[isActive === 'vendas' ? 'bg-[#ffc20e] text-black' : '']"
-              @click="toggleItens('vendas')"
-              href="#"
-              class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
-              >📁 Consulta de Vendas</a
-            >
+        
+              <NuxtLink to="/vendas">
+                <a
+                  :class="[isActive === 'vendas' ? 'bg-[#ffc20e] text-black' : '']"
+                  @click="toggleItens('vendas')"
+                  href="#"
+                  class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+                  >📁 Consulta de Vendas</a>
+
+              </NuxtLink>
+         
+            
           </li>
           <li>
             <a
@@ -71,9 +78,7 @@
               ]"
               @click="toggleItens('situacao')"
               href="#"
-              class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
-              >📁 Consulta de Situação</a
-            >
+              class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900">📁 Consulta de Situação</a>
           </li>
         </ul>
       </nav>

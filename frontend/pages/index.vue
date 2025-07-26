@@ -8,7 +8,7 @@
       @onFilterFunc="filterLotesFunction"
       @onCreate="criarLotes"
       @clearObj="clearLote"
-      @paginationLotes="paginationLotes"
+      @pagination="paginationLotes"
       @toggleMenu="closeModal"
       @openModal="openModal"
       @openModalFilter="openModalFilter"
