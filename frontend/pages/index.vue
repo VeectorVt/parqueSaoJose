@@ -122,6 +122,8 @@ const dataFilterLotes = (filter, options = [], getLoteByCrud = false) => {
   filterLotes.value = getLoteByCrud
     ? filterLotes.value
     : [...formattedOptions.value];
+
+  
 };
 
 const getLote = (lote, quadra) => {

@@ -6,8 +6,8 @@
       class="inline-flex justify-between w-52 h-full rounded-xl border border-gray-300 shadow-sm px-7 py-3 bg-[#253D90] text-sm font-medium text-white hover:bg-blue-700"
     >
       <label
-        v-if="filterLotes.length"
-        v-for="formattedOption in filterLotes"
+        v-if="filter.length"
+        v-for="formattedOption in filter"
         :key="formattedOption.value"
       >
         {{ formattedOption.value.toUpperCase() }}:<br />{{
@@ -95,7 +95,7 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
-  filterLotes: {
+  filter: {
     type: Array,
     required: false,
     default: () => [],
@@ -111,11 +111,17 @@ const options = ref([
 const selectedOptions = ref([]);
 // let formattedOptions = ref([]);
 
+
+
 const emit = defineEmits([
   "toggleMenu",
   "onConfirmSelection",
 ]);
-const { filterLotes } = toRefs(props);
+const { filter } = toRefs(props);
+
+onUpdated(()=>{
+  console.log("filter-select",filter.value)
+})
 
 // Abre e fecha modal
 const openModal = () => {

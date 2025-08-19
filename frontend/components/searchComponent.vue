@@ -16,9 +16,24 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+   lote: {
+    type: Object,
+    default: () => ({
+      num: "",
+      quadra: "",
+    }),
+  },
   vendas: {
     type: Array,
     default: () => [],
+  },
+  venda: {
+    type: Object,
+    default: () => ({
+      num: "",
+      quadra: "",
+      lote: "",
+    }),
   },
   searchPagination: {
     type: Object,
@@ -33,13 +48,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  lote: {
-    type: Object,
-    default: () => ({
-      num: "",
-      quadra: "",
-    }),
-  },
+ 
   isModalOpen: {
     type: Boolean,
     default: false,
@@ -49,6 +58,10 @@ const props = defineProps({
     default: false,
   },
   filterLotes: {
+    type: Array,
+    default: () => [],
+  },
+   filterVendas: {
     type: Array,
     default: () => [],
   },
@@ -67,7 +80,8 @@ const title = computed(() => {
   return isLote.value ? "Lotes" : "Vendas";
 });
 
-const {filterLotes} = toRefs(props)
+const { filterLotes, filterVendas } = toRefs(props);
+const filter = computed(() => filterLotes.value.length > 0 ? filterLotes.value : filterVendas.value);
 
 
 const emit = defineEmits([
@@ -90,11 +104,11 @@ function OpenModalFilter() {
  emit('openModalFilter');
 
 }
-const dataFilterLotes = (filter , options) => {
+const dataFilter = (filter , options) => {
   emit("onFilter", filter , options);
 };
 
-const filterLotesFunction = async () => {
+const filterFunction = async () => {
   emit("onFilterFunc");
 };
 
@@ -164,9 +178,9 @@ const pagination = async (
         <div class="text-center w-1/4">
           <SelectComponent
             :is-modal-filter="isModalFilter"
-            :filterLotes="filterLotes"
+            :filter="filter"
             @toggleMenu="OpenModalFilter"
-            @onConfirmSelection="dataFilterLotes"
+            @onConfirmSelection="dataFilter"
           />
         </div>
         <!-- <input
@@ -183,7 +197,7 @@ const pagination = async (
 
         <button
           class="flex items-center h-[2.7em] mr-2 p-3 rounded-xl bg-[#253D90]"
-          @click="filterLotesFunction"
+          @click="filterFunction"
         >
           <Icon name="ph:magnifying-glass" size="24" class="bg-white" />
         </button>

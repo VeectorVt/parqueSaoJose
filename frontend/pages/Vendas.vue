@@ -44,6 +44,7 @@ const columns = [
   { label: "Bairro", key: "bairro", class: "min-w-[100px]" },
   { label: "Cidade", key: "cidade", class: "min-w-[100px]" },
   { label: "UF", key: "uf", class: "min-w-[50px]" },
+  // TODO:
   // Adicione outros campos do model de venda conforme necessário
 ];
 const isModalOpen = ref(false);
