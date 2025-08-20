@@ -15,7 +15,7 @@
       :searchPagination="searchPagination"
       :isLoading="isLoading"
       :columns="columns"
-      
+      v-model:searchByName="searchByName"
       :vendas="vendas"
       :venda="venda"
       :isModalOpen="isModalOpen"
@@ -23,7 +23,6 @@
       :isModalFilter="isModalFilter"
       :filterVendas="filterVendas"
     />
-
   </div>
 </template>
 
@@ -51,6 +50,7 @@ const isModalOpen = ref(false);
 const isModalFilter = ref(false);
 const isUpdate = ref(false);
 const filterVendas = ref([]);
+const searchByName = ref("");
 const searchPagination = ref({
   currentPage: 1,
 });
@@ -117,7 +117,7 @@ const paginationVendas = async (
 ) => {
   const quadra = filterVendas.value.find((item) => item.value === "quadra");
   const lote = filterVendas.value.find((item) => item.value === "lote");
-
+  console.log("name", searchByName.value);
   try {
     isLoading.value = true;
     isSearching.value = true;
@@ -138,6 +138,7 @@ const paginationVendas = async (
           : "",
       quadra: quadra ? quadra.num : "",
       lote: lote ? lote.num : "",
+      nome: searchByName.value ? searchByName.value : "",
       totalPages: 0,
       totalItens: 0,
       hasMoreNext: false,
@@ -153,6 +154,7 @@ const paginationVendas = async (
       search.prevCursor,
       search.quadra,
       search.lote,
+      search.nome,
       search.lastPage,
       search.firstPage,
       search.isFilter

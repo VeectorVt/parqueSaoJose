@@ -38,8 +38,8 @@ export default {
   },
 
   // Paginação e filtro de vendas
-  paginationVenda(size, cursor, prevCursor, quadra, lote, lastPage, firstPage, isFilter) {
-    const params = new URLSearchParams({ size, cursor, prevCursor, quadra, lote, lastPage, firstPage, isFilter });
+  paginationVenda(size, cursor, prevCursor, quadra, lote, nome, lastPage, firstPage, isFilter) {
+    const params = new URLSearchParams({ size, cursor, prevCursor, quadra, lote, nome, lastPage, firstPage, isFilter });
     return $api(`/venda/filter/pagination?${params.toString()}`, {
       method: 'GET',
       ContentType: 'application/json',

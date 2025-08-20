@@ -6,22 +6,24 @@ const Lote = require('../lotes/lotes.model');
 const DEFAULT_PAGE_SIZE = 25;
 
 // Função para buscar lote por quadra e número
-const findLote = async (quadra, lote) => {
-  return await Lote.findOne({ quadra, lote });
-};
+// const findLote = async (quadra, lote) => {
+//   return await Lote.findOne({ quadra, lote });
+// };
 
 const enrichVenda = async (vendaDoc) => {
   const venda = vendaDoc.toObject(); // transforma em objeto puro
 
   venda.lote_info = await Lote.findById(venda.lote_id);
   // Buscar lote por quadra + número
-  venda.lote = await findLote(venda.quadra, venda.lote);
+  venda.lote = typeof venda.lote == 'number' ? await findLote(venda.quadra, venda.lote) : venda.lote;
 
   // Buscar baixas por nr_documento
   venda.baixas = await Baixa.find({ nr_documento: venda.nr_documento });
 
   // Buscar sequenciais por chave (equivalente a nr_documento)
-  venda.sequenciais = await Sequencial.find({ chave: venda.nr_documento }).populate('codigo_andamento');
+  venda.sequenciais = await Sequencial.find({ chave: venda.nr_documento })
+
+  // .populate('codigo_andamento');
 
   return venda;
 };
@@ -161,9 +163,48 @@ exports.paginationVenda = async (req, res) => {
     const lastPage = req.query.lastPage === 'true';
     const firstPage = req.query.firstPage === 'true';
 
-    const baseFilter = {};
-    if (req.query.quadra) baseFilter.quadra = req.query.quadra;
-    if (req.query.lote) baseFilter.lote = req.query.lote;
+    let baseFilter = {};
+
+    // Normalização de quadra e lote
+    let exprs = [];
+
+    if (req.query.quadra) {
+      const quadraBusca = String(req.query.quadra).replace(/^0+/, '');
+      exprs.push({
+        $eq: [
+          { $ltrim: { input: { $toString: "$quadra" }, chars: "0" } },
+          quadraBusca
+        ]
+      });
+    }
+
+    if (req.query.lote) {
+      const loteBusca = String(req.query.lote).replace(/^0+/, '');
+      exprs.push({
+        $eq: [
+          { $ltrim: { input: { $toString: "$lote" }, chars: "0" } },
+          loteBusca
+        ]
+      });
+    }
+
+    if (req.query.nome) {
+      const nomeBusca = req.query.nome.replace(/\s/g, '');
+      exprs.push({
+        $regexMatch: {
+          input: { $replaceAll: { input: "$nome", find: " ", replacement: "" } },
+          regex: nomeBusca,
+          options: "i"
+        }
+      });
+    }
+
+    // Se houver expressões, use $expr com $and
+    if (exprs.length === 1) {
+      baseFilter.$expr = exprs[0];
+    } else if (exprs.length > 1) {
+      baseFilter.$expr = { $and: exprs };
+    }
 
     const totalCount = await Venda.countDocuments(baseFilter);
     const totalPages = Math.ceil(totalCount / size);

@@ -1,4 +1,3 @@
-
 <script setup>
 // TODO
 // Generalizar props no lugar de lotes e vendas usar items e item
@@ -16,7 +15,7 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-   lote: {
+  lote: {
     type: Object,
     default: () => ({
       num: "",
@@ -48,7 +47,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
- 
+
   isModalOpen: {
     type: Boolean,
     default: false,
@@ -61,15 +60,18 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-   filterVendas: {
+  filterVendas: {
     type: Array,
     default: () => [],
+  },
+  searchByName: {
+    type: String,
+    default: "",
   },
   isModalFilter: {
     type: Boolean,
     default: false,
   },
-  
 });
 
 const isLote = computed(() => {
@@ -81,8 +83,9 @@ const title = computed(() => {
 });
 
 const { filterLotes, filterVendas } = toRefs(props);
-const filter = computed(() => filterLotes.value.length > 0 ? filterLotes.value : filterVendas.value);
-
+const filter = computed(() =>
+  filterLotes.value.length > 0 ? filterLotes.value : filterVendas.value
+);
 
 const emit = defineEmits([
   "onEdit",
@@ -97,15 +100,13 @@ const emit = defineEmits([
   "toggleMenu",
   "openModalFilter",
 ]);
-const { lote, isModalOpen, isUpdate , isModalFilter  } = toRefs(props);
-
+const { lote, isModalOpen, isUpdate, isModalFilter } = toRefs(props);
 
 function OpenModalFilter() {
- emit('openModalFilter');
-
+  emit("openModalFilter");
 }
-const dataFilter = (filter , options) => {
-  emit("onFilter", filter , options);
+const dataFilter = (filter, options) => {
+  emit("onFilter", filter, options);
 };
 
 const filterFunction = async () => {
@@ -120,7 +121,7 @@ const criarLotes = async (lote) => {
   emit("onCreate", lote);
 };
 const openEditModal = (loteEdit) => {
-  emit("openEditModal", loteEdit );
+  emit("openEditModal", loteEdit);
 };
 
 const openModal = () => {
@@ -130,7 +131,7 @@ const openModal = () => {
 
 const closeModal = () => {
   emit("toggleMenu");
-   clearObj();
+  clearObj();
 };
 
 const clearObj = () => {
@@ -152,16 +153,8 @@ const pagination = async (
   filter = "",
   nextCursor
 ) => {
-  await emit(
-    "pagination",
-    prevCursor,
-    lastPage,
-    firstPage,
-    filter,
-    nextCursor
-  );
+  await emit("pagination", prevCursor, lastPage, firstPage, filter, nextCursor);
 };
-
 </script>
 
 <template>
@@ -183,12 +176,14 @@ const pagination = async (
             @onConfirmSelection="dataFilter"
           />
         </div>
-        <!-- <input
-          class="w-full p-1 placeholder-gray-400 text-base focus:outline-none"
+        <input
+          v-if="vendas.length > 0"
+          class="w-[50%] p-1 placeholder-gray-400 text-base focus:outline-none mx-5"
           type="text"
-          placeholder="Pesquisar Lote ..."
-          v-model="search"
-        /> -->
+          placeholder="Digite o Nome do Cliente ..."
+          :value="searchByName"
+           @input="$emit('update:searchByName', $event.target.value)"
+        />
         <!-- <Icon
           v-if="isSearching"
           name="eos-icons:loading"
@@ -226,9 +221,9 @@ const pagination = async (
       :rows="lotes"
       :isLoading="isLoading"
     />
-     <!-- @onEdit="openEditModal"
+    <!-- @onEdit="openEditModal"
       @onDelete="onDelete" -->
-      <tableComponent
+    <tableComponent
       v-if="vendas.length > 0"
       :columns="columns"
       :rows="vendas"
@@ -376,3 +371,12 @@ const pagination = async (
     </div>
   </div>
 </template>
+
+<style scoped>
+input {
+  padding: 0.5rem;
+  border: 1px solid #000000;
+  border-radius: 0.375rem;
+  width: 100%;
+}
+</style>
