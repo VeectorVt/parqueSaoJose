@@ -78,15 +78,35 @@ exports.paginationLote = async (req, res) => {
     const lastPage = req.query.lastPage || null;
     const firstPage = req.query.firstPage || null;
 
-
-    const { quadra, lote } = req.query;
-
-    const baseFilter = {};
-    if (quadra && typeof quadra == 'string') baseFilter.quadra = quadra.trim();
-    if (quadra && typeof quadra == 'number') baseFilter.quadra = Number(quadra);
-    if (lote && typeof lote == 'string') baseFilter.lote = lote.trim();
-    if (lote && typeof lote == 'number') baseFilter.lote = Number(lote);
     // if (lote) baseFilter.lote_num = Number(lote);
+    let exprs = [];
+
+    if (req.query.quadra) {
+      const quadraBusca = String(req.query.quadra).replace(/^0+/, '');
+      exprs.push({
+        $eq: [
+          { $ltrim: { input: { $toString: "$quadra" }, chars: "0" } },
+          quadraBusca
+        ]
+      });
+    }
+
+    if (req.query.lote) {
+      const loteBusca = String(req.query.lote).replace(/^0+/, '');
+      exprs.push({
+        $eq: [
+          { $ltrim: { input: { $toString: "$lote" }, chars: "0" } },
+          loteBusca
+        ]
+      });
+    }
+
+    let baseFilter = {};
+    if (exprs.length === 1) {
+      baseFilter.$expr = exprs[0];
+    } else if (exprs.length > 1) {
+      baseFilter.$expr = { $and: exprs };
+    }
 
     let queryFilter = { ...baseFilter };
 
