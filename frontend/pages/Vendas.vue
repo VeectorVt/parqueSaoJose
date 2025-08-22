@@ -30,9 +30,27 @@
 import vendaService from "~/services/vendas.service";
 import Swal from "~/components/utils/customSwal";
 const columns = [
-  { label: "Lote", key: "lote", class: "min-w-[80px]" },
-  { label: "Quadra", key: "quadra", class: "min-w-[80px]" },
-  { label: "Nome", key: "nome", class: "min-w-[120px]" },
+  {
+    label: "Lote",
+    key: "lote",
+    class: "min-w-[80px]",
+    class2: "sticky left-[100px] z-10 bg-white min-w-[60px] border-r-2",
+    class3: "left-[100px] z-30 border-r-2 ",
+  },
+  {
+    label: "Quadra",
+    key: "quadra",
+    class: "min-w-[80px]",
+    class2: "sticky left-[170px] z-10 bg-white min-w-[60px] border-r-2",
+    class3: "left-[170px] z-30 border-r-2",
+  },
+  {
+    label: "Nome",
+    key: "nome",
+    class: "min-w-[120px]",
+    class2: "sticky left-[240px] z-10 bg-white min-w-[60px] border-r-2",
+    class3: "left-[240px] z-30 border-r-2",
+  },
   { label: "CPF", key: "cpf", class: "min-w-[100px]" },
   { label: "Parcela", key: "parcela", class: "min-w-[60px]" },
   { label: "Valor", key: "valor", class: "min-w-[80px]" },
@@ -43,8 +61,21 @@ const columns = [
   { label: "Bairro", key: "bairro", class: "min-w-[100px]" },
   { label: "Cidade", key: "cidade", class: "min-w-[100px]" },
   { label: "UF", key: "uf", class: "min-w-[50px]" },
-  // TODO:
-  // Adicione outros campos do model de venda conforme necessário
+  { label: "Baixa", key: "baixa", class: "min-w-[80px]" },
+  { label: "CEP", key: "cep", class: "min-w-[80px]" },
+  { label: "Código Conta", key: "codigo_conta", class: "min-w-[100px]" },
+  { label: "Condição", key: "condicao", class: "min-w-[80px]" },
+  { label: "Endereço", key: "endereco", class: "min-w-[120px]" },
+  { label: "Estado Civil", key: "estado_civil", class: "min-w-[100px]" },
+  { label: "Identidade", key: "identidade", class: "min-w-[100px]" },
+  { label: "Indexador", key: "indexador", class: "min-w-[80px]" },
+  { label: "Moeda", key: "moeda", class: "min-w-[80px]" },
+  { label: "Nacionalidade", key: "nacionalidade", class: "min-w-[100px]" },
+  { label: "Observação 1", key: "observacao1", class: "min-w-[120px]" },
+  { label: "Observação 2", key: "observacao2", class: "min-w-[120px]" },
+  { label: "Observação 3", key: "observacao3", class: "min-w-[120px]" },
+  { label: "Observação 4", key: "observacao4", class: "min-w-[120px]" },
+  { label: "Sinal", key: "sinal", class: "min-w-[80px]" },
 ];
 const isModalOpen = ref(false);
 const isModalFilter = ref(false);
@@ -61,20 +92,33 @@ let isLoading = ref(false);
 
 let venda = ref({
   lote: "",
-  lote_id: "",
-  quadra: "",
-  nome: "",
-  cpf: "",
-  parcela: "",
-  valor: "",
-  data_venda: "",
-  nr_documento: "",
-  codigo_situacao: "",
-  telefone: "",
   bairro: "",
+  baixa: "",
+  cep: "",
   cidade: "",
+  codigo_conta: "",
+  codigo_situacao: "",
+  condicao: "",
+  cpf: "",
+  data_venda: "",
+  endereco: "",
+  estado_civil: "",
+  identidade: "",
+  indexador: "",
+  moeda: "",
+  nacionalidade: "",
+  nome: "",
+  nr_documento: "",
+  observacao1: "",
+  observacao2: "",
+  observacao3: "",
+  observacao4: "",
+  parcela: "",
+  quadra: "",
+  sinal: "",
+  telefone: "",
   uf: "",
-  // Adicione outros campos do model de venda conforme necessário
+  valor: "",
 });
 
 onMounted(async () => {
@@ -260,11 +304,12 @@ const editarVendas = async (venda) => {
 
 const criarVendas = async (venda) => {
   const lote_num = venda.lote;
-
+  console.log(venda);
   venda = {
     ...venda,
     lote_num: Number(lote_num),
   };
+  console.log(venda);
 
   if (venda.quadra == "") {
     Swal.swalError({ text: "Campo Quadra é obrigatório!" });
@@ -305,19 +350,33 @@ const criarVendas = async (venda) => {
 const clearVenda = () => {
   venda.value = {
     lote: "",
-    lote_id: "",
-    quadra: "",
-    nome: "",
-    cpf: "",
-    parcela: "",
-    valor: "",
-    data_venda: "",
-    nr_documento: "",
-    codigo_situacao: "",
-    telefone: "",
     bairro: "",
+    baixa: "",
+    cep: "",
     cidade: "",
+    codigo_conta: "",
+    codigo_situacao: "",
+    condicao: "",
+    cpf: "",
+    data_venda: "",
+    endereco: "",
+    estado_civil: "",
+    identidade: "",
+    indexador: "",
+    moeda: "",
+    nacionalidade: "",
+    nome: "",
+    nr_documento: "",
+    observacao1: "",
+    observacao2: "",
+    observacao3: "",
+    observacao4: "",
+    parcela: "",
+    quadra: "",
+    sinal: "",
+    telefone: "",
     uf: "",
+    valor: "",
     // Adicione outros campos do model de venda conforme necessário
   };
 };

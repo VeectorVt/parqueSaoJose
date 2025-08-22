@@ -277,10 +277,19 @@
 <script setup>
 const emit = defineEmits(["toggleMenu", "onConfirmSelection"]);
 
+
 const props = defineProps({
   isModalOpen: Boolean,
   lote: Object,
   isUpdate:Boolean
+});
+
+onMounted(() => {
+ console.log("Lote:", props.lote);
+  // if (props.isUpdate) {
+  //   // If it's an update, we can pre-fill the form with the lote data
+  //   lote.value = { ...props.lote };
+  // }
 });
 function confirmSelection() {
   // Emit an event to the parent component with the selected value

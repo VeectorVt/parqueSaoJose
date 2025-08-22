@@ -120,6 +120,13 @@ const criarLotes = async (lote) => {
   }
   emit("onCreate", lote);
 };
+const criarVenda = async (venda) => {
+  if (isUpdate.value) {
+    await onEdit(venda);
+    return;
+  }
+  emit("onCreate", venda);
+};
 const openEditModal = (loteEdit) => {
   emit("openEditModal", loteEdit);
 };
@@ -182,7 +189,7 @@ const pagination = async (
           type="text"
           placeholder="Digite o Nome do Cliente ..."
           :value="searchByName"
-           @input="$emit('update:searchByName', $event.target.value)"
+          @input="$emit('update:searchByName', $event.target.value)"
         />
         <!-- <Icon
           v-if="isSearching"
@@ -205,9 +212,18 @@ const pagination = async (
         Adicionar Nova Venda
       </button>
       <ListasModalComponentLote
+        v-if="isLote"
         @toggleMenu="closeModal"
         @onConfirmSelection="criarLotes"
         :lote="lote"
+        :is-modal-open="isModalOpen"
+        :is-update="isUpdate"
+      />
+      <ListasModalComponentVenda
+        v-if="!isLote"
+        @toggleMenu="closeModal"
+        @onConfirmSelection="criarVenda"
+        :venda="venda"
         :is-modal-open="isModalOpen"
         :is-update="isUpdate"
       />
@@ -221,10 +237,11 @@ const pagination = async (
       :rows="lotes"
       :isLoading="isLoading"
     />
-    <!-- @onEdit="openEditModal"
-      @onDelete="onDelete" -->
+
     <tableComponent
       v-if="vendas.length > 0"
+      @onEdit="openEditModal"
+      @onDelete="onDelete"
       :columns="columns"
       :rows="vendas"
       :isLoading="isLoading"

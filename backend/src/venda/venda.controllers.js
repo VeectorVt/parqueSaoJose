@@ -28,15 +28,17 @@ const enrichVenda = async (vendaDoc) => {
   return venda;
 };
 
+// ...existing code...
+
 exports.createVenda = async (req, res) => {
   try {
-    // Supondo que req.body.lote e req.body.quadra vêm do frontend
-    const loteDoc = await Lote.findOne({ quadra: req.body.quadra, lote: req.body.lote });
-    if (!loteDoc) return res.status(400).json({ message: 'Lote não encontrado' });
+    if (!req.body.lote_id) {
+      return res.status(400).json({ message: 'Lote não encontrado' });
+    }
 
     const vendaData = {
       ...req.body,
-      lote_id: loteDoc._id, // novo campo
+      // lote_id já está presente
     };
 
     const venda = await Venda.create(vendaData);
@@ -69,7 +71,6 @@ exports.createVenda = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
-
 exports.getAllVendas = async (req, res) => {
   try {
     const vendas = await Venda.find();
@@ -97,11 +98,11 @@ exports.updateVenda = async (req, res) => {
   try {
     let updateData = { ...req.body };
 
-    // Só busca e associa o lote_id se não existir
-    if (!updateData.lote_id && updateData.quadra && updateData.lote) {
-      const loteDoc = await Lote.findOne({ quadra: updateData.quadra, lote: updateData.lote });
-      if (loteDoc) updateData.lote_id = loteDoc._id;
-    }
+    // // Só busca e associa o lote_id se não existir
+    // if (!updateData.lote_id && updateData.quadra && updateData.lote) {
+    //   const loteDoc = await Lote.findOne({ quadra: updateData.quadra, lote: updateData.lote });
+    //   if (loteDoc) updateData.lote_id = loteDoc._id;
+    // }
 
     const venda = await Venda.findByIdAndUpdate(
       req.params.id,
