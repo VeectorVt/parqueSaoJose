@@ -101,12 +101,23 @@ exports.paginationLote = async (req, res) => {
       });
     }
 
+       if (req.query.situacao) {
+      const situacaoBusca = String(req.query.situacao).replace(/^0+/, '');
+      exprs.push({
+        $eq: [
+          { $ltrim: { input: { $toString: "$codigo_situacao" }, chars: "0" } },
+          situacaoBusca
+        ]
+      });
+    }
+
     let baseFilter = {};
     if (exprs.length === 1) {
       baseFilter.$expr = exprs[0];
     } else if (exprs.length > 1) {
       baseFilter.$expr = { $and: exprs };
     }
+
 
     let queryFilter = { ...baseFilter };
 

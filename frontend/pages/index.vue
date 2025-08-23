@@ -17,6 +17,8 @@
       :columns="columns"
       :lotes="lotes"
       :lote="lote"
+      :situacoes="situacoes"
+      v-model:situacao="situacao"
       :isModalOpen="isModalOpen"
       :isUpdate="isUpdate"
       :isModalFilter="isModalFilter"
@@ -27,6 +29,7 @@
 
 <script setup>
 import loteService from "~/services/lotes.service";
+import situacaoService from "~/services/situacao.service";
 import Swal from "~/components/utils/customSwal";
 const columns = [
   {
@@ -34,14 +37,14 @@ const columns = [
     key: "lote",
     class: "min-w-[80px]",
     class2: "sticky left-[100px] z-10 bg-white min-w-[60px] border-r-2",
-    class3:'left-[100px] z-30 border-r-2 '
+    class3: "left-[100px] z-30 border-r-2 ",
   },
   {
     label: "Quadra",
     key: "quadra",
     class: "min-w-[80px]",
     class2: "sticky left-[170px] z-10 bg-white min-w-[60px] border-r-2",
-     class3:'left-[170px] z-30 border-r-2'
+    class3: "left-[170px] z-30 border-r-2",
   },
   { label: "Status", key: "status_lote", class: "min-w-[60px]" },
   { label: "Situação", key: "codigo_situacao", class: "min-w-[50px]" },
@@ -74,6 +77,10 @@ const isUpdate = ref(false);
 const filterLotes = ref([]);
 const searchPagination = ref({
   currentPage: 1,
+});
+const situacao = ref({
+  codigo_situacao: "",
+  situacao: "",
 });
 const formattedOptions = ref([]);
 const lotes = ref([]);
@@ -110,6 +117,22 @@ onMounted(async () => {
   await fetchLotes();
 });
 
+const situacoes = ref([]);
+
+const fetchSituacoes = async () => {
+  try {
+    const response = await situacaoService.getSituacoes();
+    situacoes.value = response || [];
+  } catch (error) {
+    console.error("Erro ao buscar situações:", error);
+    Swal.swalErrorResponse({ error });
+  }
+};
+
+onMounted(async () => {
+  await fetchSituacoes();
+});
+
 const dataFilterLotes = (filter, options = [], getLoteByCrud = false) => {
   if (!getLoteByCrud)
     formattedOptions.value = filter.map((option) => {
@@ -122,8 +145,6 @@ const dataFilterLotes = (filter, options = [], getLoteByCrud = false) => {
   filterLotes.value = getLoteByCrud
     ? filterLotes.value
     : [...formattedOptions.value];
-
-  
 };
 
 const getLote = (lote, quadra) => {
@@ -165,6 +186,7 @@ const paginationLotes = async (
           : "",
       quadra: quadra ? quadra.num : "",
       lote: lote ? lote.num : "",
+      situacao:situacao.value.codigo_situacao ? situacao.value.codigo_situacao : "",
       totalPages: 0,
       totalItens: 0,
       hasMoreNext: false,
@@ -180,6 +202,7 @@ const paginationLotes = async (
       search.prevCursor,
       search.quadra,
       search.lote,
+      search.situacao,
       search.lastPage,
       search.firstPage,
       search.isFilter

@@ -34,6 +34,21 @@ const props = defineProps({
       lote: "",
     }),
   },
+  situacoes: {
+    type: Array,
+    default: () => [],
+  },
+  situacao: {
+    type: Object,
+    default: () => ({
+      codigo_situacao: "",
+      situacao: "",
+    }),
+  },
+  filterSituacoes: {
+    type: Array,
+    default: () => [],
+  },
   searchPagination: {
     type: Object,
     default: () => ({
@@ -79,13 +94,19 @@ const isLote = computed(() => {
 });
 
 const title = computed(() => {
-  return isLote.value ? "Lotes" : "Vendas";
+  if (isLote.value) return "Lotes";
+  if (isSituacao.value) return "Situações";
+  return "Vendas";
 });
 
 const { filterLotes, filterVendas } = toRefs(props);
 const filter = computed(() =>
   filterLotes.value.length > 0 ? filterLotes.value : filterVendas.value
 );
+
+const isSituacao = computed(() => {
+  return props.situacoes.length > 0;
+});
 
 const emit = defineEmits([
   "onEdit",
@@ -126,6 +147,14 @@ const criarVenda = async (venda) => {
     return;
   }
   emit("onCreate", venda);
+};
+
+const criarSituacao = async (situacao) => {
+  if (isUpdate.value) {
+    await onEdit(situacao);
+    return;
+  }
+  emit("onCreate", situacao);
 };
 const openEditModal = (loteEdit) => {
   emit("openEditModal", loteEdit);
@@ -168,7 +197,10 @@ const pagination = async (
   <div>
     <h1 class="text-xl text-center font-semibold text-gray-900">{{ title }}</h1>
     <h2 class="text-md text-center text-gray-600 mb-5">
-      Lista de {{ isLote ? "Lotes" : "Vendas" }}
+      Lista de 
+      <span v-if="isLote">Lotes</span>
+      <span v-else-if="isSituacao">Situações</span>
+      <span v-else>Vendas</span>
     </h2>
   </div>
   <div class="p-5 bg-white shadow-2xl rounded-lg">
@@ -191,6 +223,17 @@ const pagination = async (
           :value="searchByName"
           @input="$emit('update:searchByName', $event.target.value)"
         />
+        <select
+          v-if="situacoes.length > 0"
+          class="mx-3 p-2 border rounded"
+          :value="situacao.codigo_situacao"
+          @change="$emit('update:situacao', situacoes.find(s => s.codigo_situacao == $event.target.value) || {})"
+        >
+          <option value="">Todas Situações</option>
+          <option v-for="s in situacoes" :key="s.codigo_situacao" :value="s.codigo_situacao">
+            {{ s.situacao }}
+          </option>
+        </select>
         <!-- <Icon
           v-if="isSearching"
           name="eos-icons:loading"
@@ -209,7 +252,7 @@ const pagination = async (
         class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
         @click="openModal"
       >
-        Adicionar Nova Venda
+        {{ isLote ? 'Adicionar Novo Lote' : isSituacao ? 'Adicionar Nova Situação' : 'Adicionar Nova Venda' }}
       </button>
       <ListasModalComponentLote
         v-if="isLote"
@@ -224,6 +267,14 @@ const pagination = async (
         @toggleMenu="closeModal"
         @onConfirmSelection="criarVenda"
         :venda="venda"
+        :is-modal-open="isModalOpen"
+        :is-update="isUpdate"
+      />
+      <ListasModalComponentSituacao
+        v-if="isSituacao"
+        @toggleMenu="closeModal"
+        @onConfirmSelection="criarSituacao"
+        :situacao="situacao"
         :is-modal-open="isModalOpen"
         :is-update="isUpdate"
       />
@@ -244,6 +295,15 @@ const pagination = async (
       @onDelete="onDelete"
       :columns="columns"
       :rows="vendas"
+      :isLoading="isLoading"
+    />
+
+    <tableComponent
+      v-if="situacoes.length > 0 && !isLote"
+      @onEdit="openEditModal"
+      @onDelete="onDelete"
+      :columns="columns"
+      :rows="situacoes"
       :isLoading="isLoading"
     />
 

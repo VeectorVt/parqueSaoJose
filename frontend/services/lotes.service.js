@@ -47,10 +47,10 @@ export default {
     });
   },
 
-  paginationLote(size, cursor, prevCursor, quadra, lote, lastPage, firstPage, isFilter) {
+  paginationLote(size, cursor, prevCursor, quadra, lote, situacao, lastPage, firstPage, isFilter) {
     // const { size, cursor, prevCursor, quadra, lote } = searchFilterParam
 
-    const params = new URLSearchParams({ size, cursor, prevCursor, quadra, lote, lastPage, firstPage, isFilter });
+    const params = new URLSearchParams({ size, cursor, prevCursor, quadra, lote, situacao, lastPage, firstPage, isFilter });
     return $api(`/lotes/filter/pagination?${params.toString()}`, {
       method: 'GET',
       ContentType: 'application/json',

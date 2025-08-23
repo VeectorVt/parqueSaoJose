@@ -58,27 +58,30 @@
           </li>
           <!-- Repetir para outros itens -->
           <li>
-        
-              <NuxtLink to="/vendas">
-                <a
-                  :class="[isActive === 'vendas' ? 'bg-[#ffc20e] text-black' : '']"
-                  @click="toggleItens('vendas')"
-                  href="#"
-                  class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
-                  >📁 Consulta de Vendas</a>
-
-              </NuxtLink>
-         
-            
+            <NuxtLink to="/vendas">
+              <a
+                :class="[
+                  isActive === 'vendas' ? 'bg-[#ffc20e] text-black' : '',
+                ]"
+                @click="toggleItens('vendas')"
+                href="#"
+                class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+                >📁 Consulta de Vendas</a
+              >
+            </NuxtLink>
           </li>
           <li>
-            <a
-              :class="[
-                isActive === 'situacao' ? 'bg-[#ffc20e] text-black' : '',
-              ]"
-              @click="toggleItens('situacao')"
-              href="#"
-              class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900">📁 Consulta de Situação</a>
+            <NuxtLink to="/situacao">
+              <a
+                :class="[
+                  isActive === 'situacao' ? 'bg-[#ffc20e] text-black' : '',
+                ]"
+                @click="toggleItens('situacao')"
+                href="#"
+                class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+                >📁 Consulta de Situação</a
+              >
+            </NuxtLink>
           </li>
         </ul>
       </nav>
@@ -102,7 +105,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(['toggleMenu'])
+const emit = defineEmits(["toggleMenu"]);
 
 defineProps({
   isOpen: Boolean,
@@ -115,7 +118,7 @@ const toggleItens = (itemActive) => {
 };
 
 const toggleMenu = () => {
-  emit('toggleMenu');
+  emit("toggleMenu");
 };
 </script>
 
